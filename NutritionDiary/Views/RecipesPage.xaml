@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage x:Class="NutritionDiary.Views.RecipesPage"
+             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             Title="Рецепты">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="20" Padding="20">
+            
+
+            <Label Text="Кулинарный гид - идеи для здорового питания"
+                   
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center" />
+
+            <!-- Рецепт дня -->
+            <Frame BackgroundColor="LightYellow"
+                   Padding="15"
+                   CornerRadius="10">
+
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="🍳 Рецепт дня"
+                           TextColor="DarkKhaki"
+                           FontAttributes="Bold" />
+
+                    <Label x:Name="DailyRecipeName"
+                           TextColor="#BDB76B"
+                           FontAttributes="Bold" />
+
+                    <Label x:Name="DailyRecipeDescription"
+                           TextColor="#BDB76B"/>
+
+                    <Button x:Name="DailyRecipeButton"
+                            Text="Подробнее"
+                            BackgroundColor="Green"
+                            TextColor="White"
+                            Clicked="OnDailyRecipeClicked" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Категории рецептов -->
+            <Label Text="Категории рецептов:"
+                   FontSize="18"
+                   FontAttributes="Bold" />
+
+            <VerticalStackLayout x:Name="CategoriesLayout" Spacing="10" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

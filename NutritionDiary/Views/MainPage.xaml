@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage x:Class="NutritionDiary.Views.MainPage"
+             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             Title="Главная">
+
+    <RefreshView x:Name="RefreshView">
+        <ScrollView>
+            <VerticalStackLayout Spacing="20" Padding="20">
+
+                <!-- Заголовок -->
+                <Label Text="Дневник питания"
+                       FontSize="24"
+                       FontAttributes="Bold"
+                       HorizontalOptions="Center" />
+
+                <!-- Прогресс калорий -->
+                <Frame BackgroundColor="White"
+                       Padding="15"
+                       CornerRadius="10">
+
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Дневной прогресс"
+                               TextColor="#483D8B"
+                               FontSize="18"
+                               FontAttributes="Bold" />
+
+                        <ProgressBar x:Name="CalorieProgressBar"
+                                     ProgressColor="#483D8B"/>
+
+                        <Label x:Name="CalorieLabel"
+                               HorizontalOptions="Center" />
+
+                        <Grid ColumnDefinitions="*,*,*,*" 
+                              ColumnSpacing="10">
+
+                            <Frame Grid.Column="0" 
+                                   BackgroundColor="#E8F5E8"
+                                   Padding="10"
+                                   CornerRadius="5">
+                                <Label x:Name="ProteinLabel"
+                                       TextColor="ForestGreen"
+                                       FontSize="12"
+                                       HorizontalOptions="Center" />
+                            </Frame>
+
+                            <Frame Grid.Column="1" 
+                                   BackgroundColor="#FFF3E0"
+                                   Padding="10"
+                                   CornerRadius="5">
+                                <Label x:Name="FatLabel"
+                                       TextColor="DarkOrange"
+                                       FontSize="12"
+                                       HorizontalOptions="Center" />
+                            </Frame>
+
+                            <Frame Grid.Column="2" 
+                                   BackgroundColor="#E3F2FD"
+                                   Padding="10"
+                                   CornerRadius="5">
+                                <Label x:Name="CarbsLabel"
+                                       TextColor="DodgerBlue"
+                                       FontSize="12"
+                                       HorizontalOptions="Center"/>
+                            </Frame>
+
+                            <Frame x:Name="TrafficLightFrame" 
+                                   Grid.Column="3" 
+                                   BackgroundColor="Gray"
+                                   Padding="10"
+                                   CornerRadius="5" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- Быстрое добавление приемов пищи -->
+                <Label Text="Добавить прием пищи"
+                       FontSize="18"
+                       FontAttributes="Bold" />
+
+                <Grid ColumnDefinitions="*,*" 
+                      RowDefinitions="*,*" 
+                      ColumnSpacing="10" 
+                      RowSpacing="10">
+
+                    <Button Grid.Row="0" Grid.Column="0"
+                            Text="🍳 Завтрак"
+                            Clicked="OnAddBreakfastClicked"
+                            BackgroundColor="Green"
+                            TextColor="White"
+                            CornerRadius="10" />
+
+                    <Button Grid.Row="0" Grid.Column="1"
+                            Text="🍲 Обед"
+                            Clicked="OnAddLunchClicked"
+                            BackgroundColor="Green"
+                            TextColor="White"
+                            CornerRadius="10" />
+
+                    <Button Grid.Row="1" Grid.Column="0"
+                            Text="🍽️ Ужин"
+                            Clicked="OnAddDinnerClicked"
+                            BackgroundColor="Green"
+                            TextColor="White"
+                            CornerRadius="10" />
+
+                    <Button Grid.Row="1" Grid.Column="1"
+                            Text="🍎 Перекус"
+                            Clicked="OnAddSnackClicked"
+                            BackgroundColor="Green"
+                            TextColor="White"
+                            CornerRadius="10" />
+                </Grid>
+
+                <!-- Навигация -->
+                <Grid ColumnDefinitions="*,*" 
+                      ColumnSpacing="10">
+
+                    <Button Grid.Column="0"
+                            Text="📊 Статистика"
+                            Clicked="OnShowStatisticsClicked"
+                            BackgroundColor="Blue"
+                            TextColor="White"
+                            CornerRadius="10" />
+
+                    <Button Grid.Column="1"
+                            Text="📖 Рецепты"
+                            Clicked="OnShowRecipesClicked"
+                            BackgroundColor="Blue"
+                            TextColor="White"
+                            CornerRadius="10" />
+                </Grid>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
+
+</ContentPage>

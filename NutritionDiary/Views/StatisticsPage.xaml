@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage x:Class="NutritionDiary.Views.StatisticsPage"
+             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             Title="Статистика">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="20" Padding="20">
+
+            <Label Text="Ваша статистика питания"
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center" />
+
+            <Frame BackgroundColor="White"
+                   Padding="15"
+                   CornerRadius="10">
+
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Сегодня"
+                           TextColor="#483D8B"
+                           FontAttributes="Bold" />
+
+                    <ProgressBar x:Name="TodayCaloriesProgress" />
+                    <Label x:Name="TodayCaloriesLabel"
+                           TextColor="#483D8B"/>
+
+                    <Label Text="Белки:"
+                           TextColor="#483D8B"/>
+                    <ProgressBar x:Name="TodayProteinProgress" />
+
+                    <Label Text="Жиры:"
+                           TextColor="#483D8B"/>
+                    <ProgressBar x:Name="TodayFatProgress" />
+
+                    <Label Text="Углеводы:"
+                           TextColor="#483D8B"/>
+                    <ProgressBar x:Name="TodayCarbsProgress" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <Frame BackgroundColor="White"
+                   Padding="15"
+                   CornerRadius="10">
+
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="За неделю"
+                           TextColor="#483D8B"
+                           FontAttributes="Bold" />
+
+                    <Label x:Name="WeekStatsLabel"
+                           TextColor="#483D8B"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <Frame BackgroundColor="White"
+                   Padding="15"
+                   CornerRadius="10">
+
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Достижения"
+                           TextColor="#483D8B"
+                           FontAttributes="Bold" />
+
+                    <Label x:Name="AchievementsLabel"
+                           TextColor="#483D8B"/>
+                </VerticalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

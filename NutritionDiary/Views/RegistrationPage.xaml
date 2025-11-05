@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage x:Class="NutritionDiary.Views.RegistrationPage"
+             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             Title="Регистрация">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="15" Padding="20">
+
+            <Label Text="Регистрация"
+                   FontSize="24"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center" />
+
+            <Frame BackgroundColor="#F5F5F5"
+                   Padding="15"
+                   CornerRadius="10">
+
+                <VerticalStackLayout Spacing="10">
+
+                    <Entry x:Name="UsernameEntry" 
+                           Placeholder="Логин" />
+
+                    <Entry x:Name="PasswordEntry" 
+                           Placeholder="Пароль" 
+                           IsPassword="True" />
+
+                    <Entry x:Name="EmailEntry" 
+                           Placeholder="Email (необязательно)" 
+                           Keyboard="Email" />
+
+                    <Entry x:Name="AgeEntry" 
+                           Placeholder="Возраст" 
+                           Keyboard="Numeric" />
+
+                    <Entry x:Name="HeightEntry" 
+                           Placeholder="Рост (см)" 
+                           Keyboard="Numeric" />
+
+                    <Entry x:Name="CurrentWeightEntry" 
+                           Placeholder="Текущий вес (кг)" 
+                           Keyboard="Numeric" />
+
+                    <Entry x:Name="DesiredWeightEntry" 
+                           Placeholder="Желаемый вес (кг)" 
+                           Keyboard="Numeric" />
+
+                    <Button x:Name="RegisterButton"
+                            Text="Зарегистрироваться"
+                            BackgroundColor="Green"
+                            TextColor="White"
+                            Clicked="OnRegisterClicked" />
+
+                    <ActivityIndicator x:Name="LoadingIndicator"
+                                      IsVisible="False"
+                                      IsRunning="False" />
+
+                </VerticalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

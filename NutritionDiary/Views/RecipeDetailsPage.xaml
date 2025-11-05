@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage x:Class="NutritionDiary.Views.RecipeDetailsPage"
+             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             Title="Рецепт">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="15" Padding="20">
+
+            <Label x:Name="TitleLabel"
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center" />
+
+            <Label x:Name="NutritionLabel" />
+
+            <Label x:Name="DescriptionLabel" />
+
+            <Label x:Name="IngredientsLabel" />
+
+            <Label x:Name="CookingLabel" />
+
+            <Button Text="Закрыть"
+                    BackgroundColor="Gray"
+                    TextColor="White"
+                    Clicked="OnCloseClicked" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

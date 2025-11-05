@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage x:Class="NutritionDiary.Views.DiaryEntryPage"
+             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             Title="Добавить запись">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="15" Padding="20">
+
+            <!-- Заголовок -->
+            <Label x:Name="TitleLabel"
+                   FontSize="18"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center" />
+
+            <!-- Выбор продукта -->
+            <!--<Label Text="Продукт:" />-->
+            <!--<Picker x:Name="ProductPicker"-->
+            <!--Title="Выберите продукт"-->
+            <!--ItemDisplayBinding="{Binding Name}" />-->
+            
+            <Label Text="Продукт:" />
+            <Picker x:Name="ProductPicker"
+            Title="Выберите продукт"
+            ItemDisplayBinding="{Binding DisplayName}" />
+
+            <!-- Альтернативный вариант - если не сработает, используйте этот -->
+            <Label Text="Или выберите из списка:" />
+            <ListView x:Name="ProductsListView"
+          HeightRequest="200"
+          IsVisible="False"
+          ItemSelected="OnProductSelectedFromList">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <Label Text="{Binding DisplayName}" />
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <Button x:Name="AddCustomProductButton"
+        Text="➕ Создать свой продукт"
+        BackgroundColor="#4682B4"
+        TextColor="White"
+        Margin="0,10,0,0"
+        Clicked="OnAddCustomProductClicked" />
+            <!-- Временная кнопка для диагностики -->
+            <!-- <Button x:Name="TestDBButton"-->
+            <!--Text="🔧 Тест БД"-->
+            <!-- BackgroundColor="LightBlue"-->
+            <!--TextColor="Black"-->
+            <!--Margin="0,10,0,0"-->
+            <!--Clicked="OnTestDBClicked" />-->
+            
+
+            <!-- Количество -->
+            <Label Text="Количество (граммы):" />
+            <Entry x:Name="QuantityEntry"
+                   Text="100"
+                   Keyboard="Numeric" />
+
+            <!-- Питательная ценность -->
+            <Frame BackgroundColor="White"
+       Padding="15"
+       CornerRadius="10">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Питательная ценность:" 
+                           TextColor="DarkSlateGrey"
+               FontAttributes="Bold" />
+
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Label Grid.Row="0" Grid.Column="0" Text="Калории:" TextColor="Black" />
+                        <Label x:Name="CaloriesLabel" Grid.Row="0" Grid.Column="1" Text="0" TextColor="Black" />
+
+                        <Label Grid.Row="1" Grid.Column="0" Text="Белки:" TextColor="Black" />
+                        <Label x:Name="ProteinLabel" Grid.Row="1" Grid.Column="1" Text="0 г" TextColor="Black" />
+
+                        <Label Grid.Row="2" Grid.Column="0" Text="Жиры:" TextColor="Black" />
+                        <Label x:Name="FatLabel" Grid.Row="2" Grid.Column="1" Text="0 г" TextColor="Black" />
+
+                        <Label Grid.Row="3" Grid.Column="0" Text="Углеводы:" TextColor="Black" />
+                        <Label x:Name="CarbsLabel" Grid.Row="3" Grid.Column="1" Text="0 г" TextColor="Black" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Кнопки действий -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <Button Grid.Column="0"
+                        Text="Сохранить"
+                        BackgroundColor="Green"
+                        TextColor="White"
+                        Clicked="OnSaveClicked" />
+
+                <Button Grid.Column="1"
+                        Text="Отмена"
+                        BackgroundColor="Gray"
+                        TextColor="White"
+                        Clicked="OnCancelClicked" />
+            </Grid>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
