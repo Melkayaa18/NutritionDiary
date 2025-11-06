@@ -19,31 +19,42 @@
                 <VerticalStackLayout Spacing="10">
 
                     <Entry x:Name="UsernameEntry" 
+                           BackgroundColor="#B0C4DE"
                            Placeholder="Логин" />
 
                     <Entry x:Name="PasswordEntry" 
+                           BackgroundColor="#B0C4DE"
                            Placeholder="Пароль" 
                            IsPassword="True" />
 
                     <Entry x:Name="EmailEntry" 
+                           BackgroundColor="#B0C4DE"
                            Placeholder="Email (необязательно)" 
                            Keyboard="Email" />
 
                     <Entry x:Name="AgeEntry" 
+                           BackgroundColor="#B0C4DE"
                            Placeholder="Возраст" 
                            Keyboard="Numeric" />
 
                     <Entry x:Name="HeightEntry" 
+                           BackgroundColor="#B0C4DE"
                            Placeholder="Рост (см)" 
                            Keyboard="Numeric" />
 
                     <Entry x:Name="CurrentWeightEntry" 
+                           BackgroundColor="#B0C4DE"
                            Placeholder="Текущий вес (кг)" 
                            Keyboard="Numeric" />
 
                     <Entry x:Name="DesiredWeightEntry" 
+                           BackgroundColor="#B0C4DE"
                            Placeholder="Желаемый вес (кг)" 
                            Keyboard="Numeric" />
+                    <Button Text="← Назад"
+                            BackgroundColor="Gray"
+                            TextColor="White"
+                            Clicked="OnBackClicked" />
 
                     <Button x:Name="RegisterButton"
                             Text="Зарегистрироваться"

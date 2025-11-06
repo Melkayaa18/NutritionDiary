@@ -91,6 +91,7 @@
                             CornerRadius="10" />
 
                     <Button Grid.Row="0" Grid.Column="1"
+                            
                             Text="🍲 Обед"
                             Clicked="OnAddLunchClicked"
                             BackgroundColor="Green"

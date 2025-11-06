@@ -3,6 +3,10 @@
     "Windows Machine": {
       "commandName": "Project",
       "nativeDebugging": false
+    },
+    "Профиль 1": {
+      "commandName": "Project",
+      "nativeDebugging": false
     }
   }
 }

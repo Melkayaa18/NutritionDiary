@@ -10,6 +10,19 @@ public partial class RegistrationPage : ContentPage
 		InitializeComponent();
         _dbHelper = new DatabaseHelper();
     }
+
+    private async void OnBackClicked(object sender, EventArgs e)
+    {
+        try
+        {
+            // Возвращаемся назад по навигации
+            await Navigation.PopAsync();
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Ошибка", $"Не удалось вернуться: {ex.Message}", "OK");
+        }
+    }
     private async void OnRegisterClicked(object sender, EventArgs e)
     {
         string username = UsernameEntry.Text;
@@ -56,7 +69,9 @@ public partial class RegistrationPage : ContentPage
             if (success)
             {
                 await DisplayAlert("Успех", "Регистрация прошла успешно! Теперь войдите в систему.", "OK");
-                await Navigation.PopAsync(); // Возвращаемся на страницу входа
+
+                // Возвращаемся на страницу входа
+                await Navigation.PopAsync();
             }
             else
             {

@@ -10,12 +10,18 @@ namespace NutritionDiary
             {
                 InitializeComponent();
 
-                // Просто устанавливаем LoginPage как стартовую
-                MainPage = new LoginPage();
+                // Создаем NavigationPage с LoginPage
+                MainPage = new NavigationPage(new LoginPage())
+                {
+                    BarBackgroundColor = Color.FromArgb("#4CAF50"), // Зеленый цвет
+                    BarTextColor = Colors.White
+                };
+
+                // Скрываем панель навигации на LoginPage
+                NavigationPage.SetHasNavigationBar(MainPage, false);
             }
             catch (Exception ex)
             {
-                // Простая страница с ошибкой
                 MainPage = new ContentPage
                 {
                     Content = new Label

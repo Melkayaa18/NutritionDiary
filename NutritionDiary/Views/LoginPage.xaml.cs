@@ -62,18 +62,24 @@ public partial class LoginPage : ContentPage
     }
     private async void OnRegisterClicked(object sender, EventArgs e)
     {
-        // Используем навигацию без Shell для регистрации
-        await Navigation.PushAsync(new RegistrationPage());
+        try
+        {
+            // Используем NavigationPage навигацию
+            await Navigation.PushAsync(new RegistrationPage());
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Ошибка", $"Не удалось открыть регистрацию: {ex.Message}", "OK");
+        }
     }
     private async void OnSkipClicked(object sender, EventArgs e)
     {
         try
         {
-            // Устанавливаем ID гостя
             Preferences.Set("UserId", 0);
             Preferences.Set("Username", "Гость");
 
-            // Переходим на AppShell
+            // Переходим на AppShell через NavigationPage
             Application.Current.MainPage = new AppShell();
         }
         catch (Exception ex)
