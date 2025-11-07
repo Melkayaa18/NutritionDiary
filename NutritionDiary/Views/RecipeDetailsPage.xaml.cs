@@ -1,4 +1,5 @@
-﻿using NutritionDiary.Models;
+﻿using Microsoft.Maui.Graphics.Text;
+using NutritionDiary.Models;
 
 namespace NutritionDiary.Views
 {
@@ -29,6 +30,7 @@ namespace NutritionDiary.Views
                 DescriptionLabel.Text = $"📝 Описание:\n{_recipe.Description}";
                 IngredientsLabel.Text = GetIngredients(_recipe.Name);
                 CookingLabel.Text = GetCookingSteps(_recipe.Name);
+            
             }
 
             private string GetIngredients(string recipeName)

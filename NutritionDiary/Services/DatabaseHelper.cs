@@ -358,6 +358,51 @@ namespace NutritionDiary.Services
             }
         }
 
+        // Получение случайного рецепта для "Рецепта дня"
+        public async Task<Recipe> GetRandomRecipe()
+        {
+            try
+            {
+                using var conn = GetConnection();
+                await conn.OpenAsync();
+
+                string query = @"
+            SELECT TOP 1 
+                RecipeId, Title, Description, Category, 
+                CaloriesPerServing, ProteinPerServing, FatPerServing, CarbsPerServing,
+                ImagePath, CookingSteps, IsActive
+            FROM Recipes 
+            WHERE IsActive = 1
+            ORDER BY NEWID()"; // NEWID() - случайная сортировка в SQL Server
+
+                using var cmd = new SqlCommand(query, conn);
+
+                using var reader = await cmd.ExecuteReaderAsync();
+                if (await reader.ReadAsync())
+                {
+                    return new Recipe
+                    {
+                        RecipeId = reader.GetInt32(0),
+                        Title = reader.GetString(1),
+                        Description = reader.IsDBNull(2) ? "" : reader.GetString(2),
+                        Category = reader.IsDBNull(3) ? "" : reader.GetString(3),
+                        CaloriesPerServing = reader.IsDBNull(4) ? 0 : reader.GetDecimal(4),
+                        ProteinPerServing = reader.IsDBNull(5) ? 0 : reader.GetDecimal(5),
+                        FatPerServing = reader.IsDBNull(6) ? 0 : reader.GetDecimal(6),
+                        CarbsPerServing = reader.IsDBNull(7) ? 0 : reader.GetDecimal(7),
+                        ImagePath = reader.IsDBNull(8) ? "" : reader.GetString(8),
+                        CookingSteps = reader.IsDBNull(9) ? "" : reader.GetString(9),
+                        IsActive = reader.GetBoolean(10)
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка получения случайного рецепта: {ex.Message}");
+            }
+
+            return null;
+        }
 
         // Проверка структуры таблицы DiaryEntries
         public async Task<string> CheckDiaryEntriesStructure()
@@ -393,5 +438,224 @@ namespace NutritionDiary.Services
                 return $"Ошибка проверки структуры: {ex.Message}";
             }
         }
+
+
+
+
+
+
+        
+        // Получение челленджей на сегодня для пользователя
+        public async Task<List<DailyChallenge>> GetTodayChallenges(int userId)
+        {
+            var challenges = new List<DailyChallenge>();
+
+            try
+            {
+                using var conn = GetConnection();
+                await conn.OpenAsync();
+
+                string query = @"
+            SELECT ChallengeId, Title, Description, Category, Icon, IsCompleted, DateAssigned
+            FROM DailyChallenges 
+            WHERE UserId = @UserId AND CAST(DateAssigned AS DATE) = CAST(GETDATE() AS DATE)
+            ORDER BY ChallengeId";
+
+                using var cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@UserId", userId);
+
+                using var reader = await cmd.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    challenges.Add(new DailyChallenge
+                    {
+                        ChallengeId = reader.GetInt32(0),
+                        Title = reader.GetString(1),
+                        Description = reader.GetString(2),
+                        Category = reader.GetString(3),
+                        Icon = reader.GetString(4),
+                        IsCompleted = reader.GetBoolean(5),
+                        DateAssigned = reader.GetDateTime(6)
+                    });
+                }
+
+                // Если челленджей на сегодня нет - создаем новые
+                if (challenges.Count == 0)
+                {
+                    await reader.CloseAsync();
+                    challenges = await GenerateDailyChallenges(userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка получения челленджей: {ex.Message}");
+            }
+
+            return challenges;
+        }
+        // Генерация случайных челленджей на день
+        private async Task<List<DailyChallenge>> GenerateDailyChallenges(int userId)
+        {
+            var challenges = new List<DailyChallenge>();
+            var random = new Random();
+
+            // База челленджей
+            var allChallenges = new[]
+            {
+        // Питание
+        new { Title = "Выпить 2 литра воды", Description = "Следите за водным балансом в течение дня", Category = "Питание", Icon = "💧" },
+        new { Title = "Съесть 5 порций овощей", Description = "Разнообразьте рацион свежими овощами", Category = "Питание", Icon = "🥦" },
+        new { Title = "Без сахара", Description = "Проведите день без добавленного сахара", Category = "Питание", Icon = "🚫" },
+        new { Title = "Новый полезный продукт", Description = "Попробуйте новый полезный продукт", Category = "Питание", Icon = "🍎" },
+        new { Title = "Приготовить здоровый ужин", Description = "Приготовьте ужин самостоятельно из полезных продуктов", Category = "Питание", Icon = "👨‍🍳" },
+        
+        // Спорт
+        new { Title = "Утренняя зарядка", Description = "10-15 минут физической активности утром", Category = "Спорт", Icon = "🏃‍♂️" },
+        new { Title = "Прогулка 30 минут", Description = "Совершите пешую прогулку на свежем воздухе", Category = "Спорт", Icon = "🚶‍♀️" },
+        new { Title = "Растяжка", Description = "Выполните комплекс упражнений на растяжку", Category = "Спорт", Icon = "🧘‍♀️" },
+        new { Title = "Лестница вместо лифта", Description = "Используйте лестницу вместо лифта весь день", Category = "Спорт", Icon = "🪜" },
+        new { Title = "10-минутная тренировка", Description = "Короткая интенсивная тренировка", Category = "Спорт", Icon = "💪" },
+        
+        // Здоровье
+        new { Title = "Ранний подъем", Description = "Проснитесь на 30 минут раньше обычного", Category = "Здоровье", Icon = "⏰" },
+        new { Title = "Цифровой детокс", Description = "Проведите 2 часа без гаджетов", Category = "Здоровье", Icon = "📵" },
+        new { Title = "Медитация 10 минут", Description = "Практика осознанности и релаксации", Category = "Здоровье", Icon = "🧠" },
+        new { Title = "Полноценный сон", Description = "Ложитесь спать до 23:00", Category = "Здоровье", Icon = "😴" },
+        new { Title = "Запись в дневнике", Description = "Запишите 3 вещи, за которые вы благодарны", Category = "Здоровье", Icon = "📔" }
+    };
+
+            // Выбираем 3 случайных челленджа
+            var selectedChallenges = allChallenges.OrderBy(x => random.Next()).Take(3).ToList();
+
+            // Сохраняем в базу
+            using var conn = GetConnection();
+            await conn.OpenAsync();
+
+            foreach (var challenge in selectedChallenges)
+            {
+                string query = @"
+            INSERT INTO DailyChallenges 
+                (UserId, Title, Description, Category, Icon, IsCompleted, DateAssigned)
+            VALUES 
+                (@UserId, @Title, @Description, @Category, @Icon, 0, GETDATE())";
+
+                using var cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@UserId", userId);
+                cmd.Parameters.AddWithValue("@Title", challenge.Title);
+                cmd.Parameters.AddWithValue("@Description", challenge.Description);
+                cmd.Parameters.AddWithValue("@Category", challenge.Category);
+                cmd.Parameters.AddWithValue("@Icon", challenge.Icon);
+
+                await cmd.ExecuteNonQueryAsync();
+
+                // Добавляем в возвращаемый список
+                challenges.Add(new DailyChallenge
+                {
+                    Title = challenge.Title,
+                    Description = challenge.Description,
+                    Category = challenge.Category,
+                    Icon = challenge.Icon,
+                    IsCompleted = false,
+                    DateAssigned = DateTime.Today
+                });
+            }
+
+            return challenges;
+        }
+        // Отметка челленджа как выполненного
+        public async Task<bool> CompleteChallenge(int challengeId)
+        {
+            try
+            {
+                using var conn = GetConnection();
+                await conn.OpenAsync();
+
+                string query = "UPDATE DailyChallenges SET IsCompleted = 1 WHERE ChallengeId = @ChallengeId";
+                using var cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@ChallengeId", challengeId);
+
+                return await cmd.ExecuteNonQueryAsync() > 0;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка отметки челленджа: {ex.Message}");
+                return false;
+            }
+        }
+
+        // Снятие отметки о выполнении челленджа
+        public async Task<bool> UncompleteChallenge(int challengeId)
+        {
+            try
+            {
+                using var conn = GetConnection();
+                await conn.OpenAsync();
+
+                string query = "UPDATE DailyChallenges SET IsCompleted = 0 WHERE ChallengeId = @ChallengeId";
+                using var cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@ChallengeId", challengeId);
+
+                return await cmd.ExecuteNonQueryAsync() > 0;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка снятия отметки челленджа: {ex.Message}");
+                return false;
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+        public class ChallengesStatistics
+        {
+            public int TotalCompleted { get; set; }
+            public int TotalAssigned { get; set; }
+            public int CurrentStreak { get; set; }
+            public int BestStreak { get; set; }
+        }
+
+        public async Task<ChallengesStatistics> GetChallengesStatistics(int userId)
+        {
+            try
+            {
+                using var conn = GetConnection();
+                await conn.OpenAsync();
+
+                var stats = new ChallengesStatistics();
+
+                // Общее количество выполненных
+                string completedQuery = "SELECT COUNT(*) FROM DailyChallenges WHERE UserId = @UserId AND IsCompleted = 1";
+                using var completedCmd = new SqlCommand(completedQuery, conn);
+                completedCmd.Parameters.AddWithValue("@UserId", userId);
+                stats.TotalCompleted = Convert.ToInt32(await completedCmd.ExecuteScalarAsync());
+
+                // Общее количество назначенных
+                string assignedQuery = "SELECT COUNT(*) FROM DailyChallenges WHERE UserId = @UserId";
+                using var assignedCmd = new SqlCommand(assignedQuery, conn);
+                assignedCmd.Parameters.AddWithValue("@UserId", userId);
+                stats.TotalAssigned = Convert.ToInt32(await assignedCmd.ExecuteScalarAsync());
+
+                // Здесь можно добавить логику для вычисления серий
+                // Пока заглушки
+                stats.CurrentStreak = 3;
+                stats.BestStreak = 7;
+
+                return stats;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка получения статистики: {ex.Message}");
+                return new ChallengesStatistics();
+            }
+        }
+
+
     }
 }

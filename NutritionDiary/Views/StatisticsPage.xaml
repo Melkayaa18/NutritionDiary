@@ -67,6 +67,42 @@
                 </VerticalStackLayout>
             </Frame>
 
+            
+            
+            
+            <Frame BackgroundColor="White"
+       Padding="15"
+       CornerRadius="10">
+
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="🎯 Челлендж на сегодня"
+               FontAttributes="Bold"
+                           TextColor="Black"/>
+
+                    <Label x:Name="ChallengesInfoLabel"
+               Text="Загрузка..."
+               FontSize="12"
+                           TextColor="Black"/>
+
+                    <VerticalStackLayout x:Name="ChallengesLayout" Spacing="8" />
+
+                    <Button x:Name="AchievementsButton"
+Text="🏆 Получи совет!"
+BackgroundColor="LightBlue"
+TextColor="Black"
+FontSize="12"
+Clicked="OnDailyTipClicked" />
+
+                </VerticalStackLayout>
+            </Frame>
+            <!-- Добавьте после ChallengesInfoLabel -->
+            <ProgressBar x:Name="ChallengesProgressBar"
+             Progress="0"
+             BackgroundColor="LightGray"
+             ProgressColor="#4CAF50" />
+
+
+            
         </VerticalStackLayout>
     </ScrollView>
 

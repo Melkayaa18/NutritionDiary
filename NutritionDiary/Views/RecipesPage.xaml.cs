@@ -1,4 +1,5 @@
 ﻿using NutritionDiary.Models;
+using NutritionDiary.Services;
 
 namespace NutritionDiary.Views;
 
@@ -12,21 +13,64 @@ public partial class RecipesPage : ContentPage
         LoadDailyRecipe();
         LoadCategories();
     }
-    private void LoadDailyRecipe()
+    private async void LoadDailyRecipe()
     {
-        // Заглушка для рецепта дня
-        _dailyRecipe = new RecipeData
+        try
         {
-            Name = "Смузи-боул с ягодами",
-            Calories = 280,
-            Protein = 12,
-            Fat = 8,
-            Carbs = 40,
-            Description = "Питательный смузи-боул для энергичного начала дня"
-        };
+            var dbHelper = new DatabaseHelper();
+            var randomRecipe = await dbHelper.GetRandomRecipe();
+
+            if (randomRecipe != null)
+            {
+                // Используем рецепт из базы данных
+                _dailyRecipe = new RecipeData
+                {
+                    Name = randomRecipe.Title,
+                    Calories = (int)randomRecipe.CaloriesPerServing,
+                    Protein = (int)randomRecipe.ProteinPerServing,
+                    Fat = (int)randomRecipe.FatPerServing,
+                    Carbs = (int)randomRecipe.CarbsPerServing,
+                    Description = randomRecipe.Description
+                };
+
+                DailyRecipeName.Text = _dailyRecipe.Name;
+                DailyRecipeDescription.Text = _dailyRecipe.Description;
+
+                System.Diagnostics.Debug.WriteLine($"Загружен рецепт дня: {_dailyRecipe.Name}");
+            }
+            else
+            {
+                // Если в базе нет рецептов, используем fallback
+                LoadFallbackDailyRecipe();
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Ошибка загрузки рецепта дня: {ex.Message}");
+            LoadFallbackDailyRecipe();
+        }
+    }
+    // Резервный метод на случай проблем с базой
+    private void LoadFallbackDailyRecipe()
+    {
+        // Создаем массив fallback рецептов
+        var fallbackRecipes = new[]
+        {
+        new RecipeData { Name = "Смузи-боул с ягодами", Calories = 280, Protein = 12, Fat = 8, Carbs = 40, Description = "Питательный смузи-боул для энергичного начала дня" },
+        new RecipeData { Name = "Куриный салат", Calories = 350, Protein = 25, Fat = 12, Carbs = 28, Description = "Свежий салат с куриной грудкой и овощами" },
+        new RecipeData { Name = "Овсянка с ягодами", Calories = 280, Protein = 10, Fat = 5, Carbs = 45, Description = "Питательная овсяная каша со свежими ягодами" },
+        new RecipeData { Name = "Тушеные овощи", Calories = 180, Protein = 6, Fat = 4, Carbs = 28, Description = "Ассорти из сезонных тушеных овощей" },
+        new RecipeData { Name = "Гречка с грибами", Calories = 320, Protein = 12, Fat = 8, Carbs = 50, Description = "Гречка с тушеными грибами и луком" }
+    };
+
+        // Выбираем случайный рецепт из fallback
+        var random = new Random();
+        _dailyRecipe = fallbackRecipes[random.Next(fallbackRecipes.Length)];
 
         DailyRecipeName.Text = _dailyRecipe.Name;
         DailyRecipeDescription.Text = _dailyRecipe.Description;
+
+        System.Diagnostics.Debug.WriteLine($"Использован fallback рецепт: {_dailyRecipe.Name}");
     }
 
     private void LoadCategories()

@@ -19,5 +19,9 @@ namespace NutritionDiary.Models
         public string ImagePath { get; set; }
         public string CookingSteps { get; set; }
         public bool IsActive { get; set; }
+
+        // Добавим вычисляемое свойство для отображения
+        public string NutritionInfo =>
+            $"⚡ {CaloriesPerServing} ккал • 🥚 {ProteinPerServing}г • 🥑 {FatPerServing}г • 🌾 {CarbsPerServing}г";
     }
 }
