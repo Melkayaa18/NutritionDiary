@@ -456,7 +456,7 @@ namespace NutritionDiary.Services
                 await conn.OpenAsync();
 
                 string query = @"
-            SELECT ChallengeId, Title, Description, Category, Icon, IsCompleted, DateAssigned
+            SELECT ChallengeId, Title, Description, Category, IsCompleted, DateAssigned
             FROM DailyChallenges 
             WHERE UserId = @UserId AND CAST(DateAssigned AS DATE) = CAST(GETDATE() AS DATE)
             ORDER BY ChallengeId";
@@ -473,9 +473,8 @@ namespace NutritionDiary.Services
                         Title = reader.GetString(1),
                         Description = reader.GetString(2),
                         Category = reader.GetString(3),
-                        Icon = reader.GetString(4),
-                        IsCompleted = reader.GetBoolean(5),
-                        DateAssigned = reader.GetDateTime(6)
+                        IsCompleted = reader.GetBoolean(4),
+                        DateAssigned = reader.GetDateTime(5)
                     });
                 }
 
@@ -499,35 +498,35 @@ namespace NutritionDiary.Services
             var challenges = new List<DailyChallenge>();
             var random = new Random();
 
-            // База челленджей
+            // База челленджей БЕЗ иконок
             var allChallenges = new[]
             {
         // Питание
-        new { Title = "Выпить 2 литра воды", Description = "Следите за водным балансом в течение дня", Category = "Питание", Icon = "💧" },
-        new { Title = "Съесть 5 порций овощей", Description = "Разнообразьте рацион свежими овощами", Category = "Питание", Icon = "🥦" },
-        new { Title = "Без сахара", Description = "Проведите день без добавленного сахара", Category = "Питание", Icon = "🚫" },
-        new { Title = "Новый полезный продукт", Description = "Попробуйте новый полезный продукт", Category = "Питание", Icon = "🍎" },
-        new { Title = "Приготовить здоровый ужин", Description = "Приготовьте ужин самостоятельно из полезных продуктов", Category = "Питание", Icon = "👨‍🍳" },
+        new { Title = "Выпить 2 литра воды", Description = "Следите за водным балансом в течение дня", Category = "Питание" },
+        new { Title = "Съесть 5 порций овощей", Description = "Разнообразьте рацион свежими овощами", Category = "Питание" },
+        new { Title = "Без сахара", Description = "Проведите день без добавленного сахара", Category = "Питание" },
+        new { Title = "Новый полезный продукт", Description = "Попробуйте новый полезный продукт", Category = "Питание" },
+        new { Title = "Приготовить здоровый ужин", Description = "Приготовьте ужин самостоятельно из полезных продуктов", Category = "Питание" },
         
         // Спорт
-        new { Title = "Утренняя зарядка", Description = "10-15 минут физической активности утром", Category = "Спорт", Icon = "🏃‍♂️" },
-        new { Title = "Прогулка 30 минут", Description = "Совершите пешую прогулку на свежем воздухе", Category = "Спорт", Icon = "🚶‍♀️" },
-        new { Title = "Растяжка", Description = "Выполните комплекс упражнений на растяжку", Category = "Спорт", Icon = "🧘‍♀️" },
-        new { Title = "Лестница вместо лифта", Description = "Используйте лестницу вместо лифта весь день", Category = "Спорт", Icon = "🪜" },
-        new { Title = "10-минутная тренировка", Description = "Короткая интенсивная тренировка", Category = "Спорт", Icon = "💪" },
+        new { Title = "Утренняя зарядка", Description = "10-15 минут физической активности утром", Category = "Спорт" },
+        new { Title = "Прогулка 30 минут", Description = "Совершите пешую прогулку на свежем воздухе", Category = "Спорт" },
+        new { Title = "Растяжка", Description = "Выполните комплекс упражнений на растяжку", Category = "Спорт" },
+        new { Title = "Лестница вместо лифта", Description = "Используйте лестницу вместо лифта весь день", Category = "Спорт" },
+        new { Title = "10-минутная тренировка", Description = "Короткая интенсивная тренировка", Category = "Спорт" },
         
         // Здоровье
-        new { Title = "Ранний подъем", Description = "Проснитесь на 30 минут раньше обычного", Category = "Здоровье", Icon = "⏰" },
-        new { Title = "Цифровой детокс", Description = "Проведите 2 часа без гаджетов", Category = "Здоровье", Icon = "📵" },
-        new { Title = "Медитация 10 минут", Description = "Практика осознанности и релаксации", Category = "Здоровье", Icon = "🧠" },
-        new { Title = "Полноценный сон", Description = "Ложитесь спать до 23:00", Category = "Здоровье", Icon = "😴" },
-        new { Title = "Запись в дневнике", Description = "Запишите 3 вещи, за которые вы благодарны", Category = "Здоровье", Icon = "📔" }
+        new { Title = "Ранний подъем", Description = "Проснитесь на 30 минут раньше обычного", Category = "Здоровье" },
+        new { Title = "Цифровой детокс", Description = "Проведите 2 часа без гаджетов", Category = "Здоровье" },
+        new { Title = "Медитация 10 минут", Description = "Практика осознанности и релаксации", Category = "Здоровье" },
+        new { Title = "Полноценный сон", Description = "Ложитесь спать до 23:00", Category = "Здоровье" },
+        new { Title = "Запись в дневнике", Description = "Запишите 3 вещи, за которые вы благодарны", Category = "Здоровье" }
     };
 
             // Выбираем 3 случайных челленджа
             var selectedChallenges = allChallenges.OrderBy(x => random.Next()).Take(3).ToList();
 
-            // Сохраняем в базу
+            // Сохраняем в базу БЕЗ иконок
             using var conn = GetConnection();
             await conn.OpenAsync();
 
@@ -535,16 +534,15 @@ namespace NutritionDiary.Services
             {
                 string query = @"
             INSERT INTO DailyChallenges 
-                (UserId, Title, Description, Category, Icon, IsCompleted, DateAssigned)
+                (UserId, Title, Description, Category, IsCompleted, DateAssigned)
             VALUES 
-                (@UserId, @Title, @Description, @Category, @Icon, 0, GETDATE())";
+                (@UserId, @Title, @Description, @Category, 0, GETDATE())";
 
                 using var cmd = new SqlCommand(query, conn);
                 cmd.Parameters.AddWithValue("@UserId", userId);
                 cmd.Parameters.AddWithValue("@Title", challenge.Title);
                 cmd.Parameters.AddWithValue("@Description", challenge.Description);
                 cmd.Parameters.AddWithValue("@Category", challenge.Category);
-                cmd.Parameters.AddWithValue("@Icon", challenge.Icon);
 
                 await cmd.ExecuteNonQueryAsync();
 
@@ -554,7 +552,6 @@ namespace NutritionDiary.Services
                     Title = challenge.Title,
                     Description = challenge.Description,
                     Category = challenge.Category,
-                    Icon = challenge.Icon,
                     IsCompleted = false,
                     DateAssigned = DateTime.Today
                 });

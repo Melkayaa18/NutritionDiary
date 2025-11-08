@@ -51,6 +51,7 @@
                     <Label x:Name="WeekStatsLabel"
                            TextColor="#483D8B"/>
                 </VerticalStackLayout>
+                
             </Frame>
 
             <Frame BackgroundColor="White"
@@ -67,7 +68,8 @@
                 </VerticalStackLayout>
             </Frame>
 
-            
+
+
             
             
             <Frame BackgroundColor="White"

@@ -76,10 +76,10 @@ namespace NutritionDiary.Views
                     ColumnSpacing = 12
                 };
 
-                // Иконка (первая колонка)
+                // Иконка (первая колонка) - теперь из свойства модели
                 var iconLabel = new Label
                 {
-                    Text = challenge.Icon,
+                    Text = challenge.Icon, // ← Используем вычисляемое свойство Icon
                     FontSize = 24,
                     VerticalOptions = LayoutOptions.Center,
                     HorizontalOptions = LayoutOptions.Center
@@ -93,7 +93,7 @@ namespace NutritionDiary.Views
                 textLayout.Children.Add(new Label
                 {
                     Text = challenge.Title,
-                    FontAttributes = FontAttributes.Bold,
+                    FontAttributes = challenge.IsCompleted ? FontAttributes.Italic : FontAttributes.None,
                     TextColor = challenge.IsCompleted ? Colors.Green : Colors.Black,
                     FontSize = 14
                 });
@@ -108,7 +108,7 @@ namespace NutritionDiary.Views
                 // Категория с цветным бейджем
                 var categoryLabel = new Label
                 {
-                    Text = GetCategoryEmoji(challenge.Category) + " " + challenge.Category,
+                    Text = $"{challenge.Icon} {challenge.Category}", // Используем ту же иконку
                     FontSize = 10,
                     TextColor = GetCategoryColor(challenge.Category),
                     FontAttributes = FontAttributes.Bold
@@ -136,17 +136,7 @@ namespace NutritionDiary.Views
                 ChallengesLayout.Children.Add(challengeFrame);
             }
         }
-        // Вспомогательные методы для категорий
-        private string GetCategoryEmoji(string category)
-        {
-            return category switch
-            {
-                "Питание" => "🍎",
-                "Спорт" => "💪",
-                "Здоровье" => "❤️",
-                _ => "🎯"
-            };
-        }
+        
 
         private Color GetCategoryColor(string category)
         {
