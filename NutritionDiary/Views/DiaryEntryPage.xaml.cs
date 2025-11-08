@@ -1,4 +1,5 @@
-﻿using NutritionDiary.Models;
+﻿using System.Collections.ObjectModel;
+using NutritionDiary.Models;
 using NutritionDiary.Services;
 
 namespace NutritionDiary.Views;
@@ -9,26 +10,20 @@ public partial class DiaryEntryPage : ContentPage
     private int _userId;
     private int _mealTypeId;
     private string _mealTypeName;
-    private List<Product> _products;
+    private List<Product> _allProducts;
+    private ObservableCollection<Product> _filteredProducts;
     public DiaryEntryPage(int mealTypeId, string mealTypeName)
 	{
         try
         {
-            System.Diagnostics.Debug.WriteLine("=== Инициализация DiaryEntryPage ===");
-
             InitializeComponent();
 
-            // Инициализируем _dbHelper ПЕРВЫМ делом
             _dbHelper = new DatabaseHelper();
-            System.Diagnostics.Debug.WriteLine("_dbHelper инициализирован");
-
             _userId = Preferences.Get("UserId", 0);
             _mealTypeId = mealTypeId;
             _mealTypeName = mealTypeName;
 
-            System.Diagnostics.Debug.WriteLine($"Параметры: UserId={_userId}, MealTypeId={_mealTypeId}, MealTypeName={_mealTypeName}");
-
-            // Не вызываем InitializePage здесь, сделаем это в OnAppearing
+            InitializePage();
         }
         catch (Exception ex)
         {
@@ -66,10 +61,8 @@ public partial class DiaryEntryPage : ContentPage
         {
             System.Diagnostics.Debug.WriteLine("Начало InitializePage");
 
-            // Двойная проверка _dbHelper
             if (_dbHelper == null)
             {
-                System.Diagnostics.Debug.WriteLine("Экстренное создание _dbHelper в InitializePage");
                 _dbHelper = new DatabaseHelper();
             }
 
@@ -83,7 +76,6 @@ public partial class DiaryEntryPage : ContentPage
             await LoadProducts();
 
             // Настраиваем обработчики событий
-            ProductPicker.SelectedIndexChanged += OnProductSelected;
             QuantityEntry.TextChanged += OnQuantityChanged;
 
             // Первоначальный расчет
@@ -104,30 +96,28 @@ public partial class DiaryEntryPage : ContentPage
         {
             System.Diagnostics.Debug.WriteLine("Начало LoadProducts");
 
-            // Защита от null
             if (_dbHelper == null)
             {
                 System.Diagnostics.Debug.WriteLine("_dbHelper is NULL в LoadProducts! Создаем новый.");
                 _dbHelper = new DatabaseHelper();
             }
 
-            _products = await _dbHelper.GetProducts();
-            System.Diagnostics.Debug.WriteLine($"Загружено продуктов: {_products?.Count ?? 0}");
+            _allProducts = await _dbHelper.GetProducts();
+            _filteredProducts = new ObservableCollection<Product>(_allProducts);
 
-            if (_products == null || _products.Count == 0)
+            ProductsListView.ItemsSource = _filteredProducts;
+
+            System.Diagnostics.Debug.WriteLine($"Загружено продуктов: {_allProducts?.Count ?? 0}");
+
+            if (_allProducts == null || _allProducts.Count == 0)
             {
                 await DisplayAlert("Информация", "В базе данных нет продуктов", "OK");
                 return;
             }
 
-            // Очищаем Picker и добавляем продукты
-            ProductPicker.ItemsSource = null;
-            ProductPicker.ItemsSource = _products;
-
-            if (_products.Count > 0)
+            if (_allProducts.Count > 0)
             {
-                ProductPicker.SelectedIndex = 0;
-                System.Diagnostics.Debug.WriteLine($"Первый продукт: {_products[0].Name}");
+                System.Diagnostics.Debug.WriteLine($"Первый продукт: {_allProducts[0].Name}");
             }
         }
         catch (Exception ex)
@@ -136,13 +126,62 @@ public partial class DiaryEntryPage : ContentPage
             await DisplayAlert("Ошибка", $"Не удалось загрузить продукты: {ex.Message}", "OK");
         }
     }
+
+    // Обработчик поиска
+    private void OnSearchTextChanged(object sender, TextChangedEventArgs e)
+    {
+        try
+        {
+            var searchText = e.NewTextValue ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(searchText))
+            {
+                // Если поиск пустой - показываем все продукты
+                _filteredProducts.Clear();
+                foreach (var product in _allProducts)
+                {
+                    _filteredProducts.Add(product);
+                }
+            }
+            else
+            {
+                // Фильтруем продукты по введенному тексту
+                var filtered = _allProducts.Where(p =>
+                    p.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+                    p.DisplayName.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+                ).ToList();
+
+                _filteredProducts.Clear();
+                foreach (var product in filtered)
+                {
+                    _filteredProducts.Add(product);
+                }
+            }
+
+            System.Diagnostics.Debug.WriteLine($"Поиск: '{searchText}', найдено: {_filteredProducts.Count}");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Ошибка поиска: {ex.Message}");
+        }
+    }
+
+
     private void OnProductSelectedFromList(object sender, SelectedItemChangedEventArgs e)
     {
-        if (e.SelectedItem is Product selectedProduct)
+        try
         {
-            // Обновляем Picker выбранным продуктом
-            ProductPicker.SelectedItem = selectedProduct;
-            CalculateNutrition();
+            if (e.SelectedItem is Product selectedProduct)
+            {
+                System.Diagnostics.Debug.WriteLine($"Выбран продукт: {selectedProduct.Name}");
+                
+                // Можно добавить подсветку выбранного элемента если нужно
+                CalculateNutrition();
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Ошибка выбора продукта: {ex.Message}");
         }
     }
     private async void OnAddCustomProductClicked(object sender, EventArgs e)
@@ -164,10 +203,7 @@ public partial class DiaryEntryPage : ContentPage
             await DisplayAlert("Ошибка", $"Не удалось открыть страницу создания продукта: {ex.Message}", "OK");
         }
     }
-    private void OnProductSelected(object sender, EventArgs e)
-    {
-        CalculateNutrition();
-    }
+
 
     private void OnQuantityChanged(object sender, TextChangedEventArgs e)
     {
@@ -180,8 +216,9 @@ public partial class DiaryEntryPage : ContentPage
         {
             System.Diagnostics.Debug.WriteLine("=== CalculateNutrition called ===");
 
-            // Проверяем выбран ли продукт
-            if (ProductPicker.SelectedItem == null)
+            // Проверяем выбран ли продукт из ListView
+            var selectedProduct = ProductsListView.SelectedItem as Product;
+            if (selectedProduct == null)
             {
                 System.Diagnostics.Debug.WriteLine("Продукт не выбран");
                 ResetNutritionLabels();
@@ -192,15 +229,6 @@ public partial class DiaryEntryPage : ContentPage
             if (string.IsNullOrEmpty(QuantityEntry.Text) || !decimal.TryParse(QuantityEntry.Text, out decimal grams) || grams <= 0)
             {
                 System.Diagnostics.Debug.WriteLine($"Некорректное количество: {QuantityEntry.Text}");
-                ResetNutritionLabels();
-                return;
-            }
-
-            // Получаем выбранный продукт
-            var selectedProduct = ProductPicker.SelectedItem as Product;
-            if (selectedProduct == null)
-            {
-                System.Diagnostics.Debug.WriteLine("Выбранный продукт = null");
                 ResetNutritionLabels();
                 return;
             }
@@ -217,7 +245,7 @@ public partial class DiaryEntryPage : ContentPage
 
             System.Diagnostics.Debug.WriteLine($"Рассчитано - Калории: {calories}, Белки: {protein}, Жиры: {fat}, Углеводы: {carbs}");
 
-            // Обновляем UI напрямую
+            // Обновляем UI
             UpdateNutritionLabels(calories, protein, fat, carbs);
 
         }
@@ -275,30 +303,17 @@ public partial class DiaryEntryPage : ContentPage
                 return;
             }
 
-            // Проверяем _dbHelper
-            if (_dbHelper == null)
+            // Проверяем выбран ли продукт из ListView
+            var selectedProduct = ProductsListView.SelectedItem as Product;
+            if (selectedProduct == null)
             {
-                System.Diagnostics.Debug.WriteLine("_dbHelper is NULL в OnSaveClicked! Создаем новый.");
-                _dbHelper = new DatabaseHelper();
-            }
-
-            // Остальная логика сохранения...
-            if (ProductPicker.SelectedItem == null)
-            {
-                await DisplayAlert("Ошибка", "Выберите продукт", "OK");
+                await DisplayAlert("Ошибка", "Выберите продукт из списка", "OK");
                 return;
             }
 
             if (!decimal.TryParse(QuantityEntry.Text, out decimal grams) || grams <= 0)
             {
                 await DisplayAlert("Ошибка", "Введите корректное количество (больше 0)", "OK");
-                return;
-            }
-
-            var selectedProduct = ProductPicker.SelectedItem as Product;
-            if (selectedProduct == null)
-            {
-                await DisplayAlert("Ошибка", "Ошибка при получении данных продукта", "OK");
                 return;
             }
 
@@ -333,10 +348,6 @@ public partial class DiaryEntryPage : ContentPage
             System.Diagnostics.Debug.WriteLine($"❌ Исключение в OnSaveClicked: {ex.Message}");
             await DisplayAlert("Ошибка", $"Не удалось сохранить запись: {ex.Message}", "OK");
         }
-        finally
-        {
-            System.Diagnostics.Debug.WriteLine("=== КОНЕЦ OnSaveClicked ===");
-        }
     }
    
     private async void OnCancelClicked(object sender, EventArgs e)
@@ -348,12 +359,7 @@ public partial class DiaryEntryPage : ContentPage
     {
         base.OnDisappearing();
 
-        // Отписываемся от событий
-        if (ProductPicker != null)
-        {
-            ProductPicker.SelectedIndexChanged -= OnProductSelected;
-        }
-
+        // Отписываемся от событий (теперь только QuantityEntry, т.к. ProductPicker удален)
         if (QuantityEntry != null)
         {
             QuantityEntry.TextChanged -= OnQuantityChanged;

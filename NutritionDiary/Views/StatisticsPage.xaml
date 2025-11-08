@@ -54,24 +54,13 @@
                 
             </Frame>
 
-            <Frame BackgroundColor="White"
-                   Padding="15"
-                   CornerRadius="10">
 
-                <VerticalStackLayout Spacing="10">
-                    <Label Text="Достижения"
-                           TextColor="#483D8B"
-                           FontAttributes="Bold" />
-
-                    <Label x:Name="AchievementsLabel"
-                           TextColor="#483D8B"/>
-                </VerticalStackLayout>
-            </Frame>
+            <ProgressBar x:Name="ChallengesProgressBar"
+ Progress="0"
+ BackgroundColor="LightGray"
+ ProgressColor="#4CAF50" />
 
 
-
-            
-            
             <Frame BackgroundColor="White"
        Padding="15"
        CornerRadius="10">
@@ -97,14 +86,10 @@ Clicked="OnDailyTipClicked" />
 
                 </VerticalStackLayout>
             </Frame>
-            <!-- Добавьте после ChallengesInfoLabel -->
-            <ProgressBar x:Name="ChallengesProgressBar"
+            <!--<ProgressBar x:Name="ChallengesProgressBar"
              Progress="0"
              BackgroundColor="LightGray"
-             ProgressColor="#4CAF50" />
-
-
-            
+             ProgressColor="#4CAF50" />-->
         </VerticalStackLayout>
     </ScrollView>
 

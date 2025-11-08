@@ -18,40 +18,53 @@
             <!--<Picker x:Name="ProductPicker"-->
             <!--Title="Выберите продукт"-->
             <!--ItemDisplayBinding="{Binding Name}" />-->
-            
-            <Label Text="Продукт:" />
-            <Picker x:Name="ProductPicker"
-            Title="Выберите продукт"
-            ItemDisplayBinding="{Binding DisplayName}" />
 
-            <!-- Альтернативный вариант - если не сработает, используйте этот -->
-            <Label Text="Или выберите из списка:" />
+            <!-- Поиск продукта -->
+            <Label Text="Поиск продукта:" />
+            <SearchBar x:Name="ProductSearchBar"
+                       TextColor="Black"
+                      Placeholder="Начните вводить название продукта..."
+                      TextChanged="OnSearchTextChanged"
+                      BackgroundColor="White" />
+
+            <!-- Список продуктов -->
             <ListView x:Name="ProductsListView"
           HeightRequest="200"
-          IsVisible="False"
-          ItemSelected="OnProductSelectedFromList">
+                      
+          ItemSelected="OnProductSelectedFromList"
+          HasUnevenRows="True">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <ViewCell>
-                            <Label Text="{Binding DisplayName}" />
+                            <Grid Padding="15,10" BackgroundColor="White">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                    <Label Text="{Binding Name}" 
+                                    TextColor="Black"
+                               FontSize="14" 
+                               FontAttributes="Bold" />
+                                    <Label Text="{Binding CaloriesPer100g, StringFormat='{0} ккал/100г'}" 
+                               FontSize="12" 
+                               
+                               TextColor="Gray" />
+                                </VerticalStackLayout>
+
+                                <Label Grid.Column="1" 
+                                       
+                           Text="✅" 
+                           FontSize="16" 
+                           TextColor="Black"
+                           IsVisible="{Binding IsSelected}" />
+                            </Grid>
                         </ViewCell>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-            <Button x:Name="AddCustomProductButton"
-        Text="➕ Создать свой продукт"
-        BackgroundColor="#4682B4"
-        TextColor="White"
-        Margin="0,10,0,0"
-        Clicked="OnAddCustomProductClicked" />
-            <!-- Временная кнопка для диагностики -->
-            <!-- <Button x:Name="TestDBButton"-->
-            <!--Text="🔧 Тест БД"-->
-            <!-- BackgroundColor="LightBlue"-->
-            <!--TextColor="Black"-->
-            <!--Margin="0,10,0,0"-->
-            <!--Clicked="OnTestDBClicked" />-->
-            
+
 
             <!-- Количество -->
             <Label Text="Количество (граммы):" />
@@ -94,7 +107,13 @@
                     </Grid>
                 </VerticalStackLayout>
             </Frame>
-
+            <!-- Кнопка создания своего продукта -->
+            <Button x:Name="AddCustomProductButton"
+        Text="➕ Создать свой продукт"
+        BackgroundColor="#4682B4"
+        TextColor="White"
+        Margin="0,10,0,0"
+        Clicked="OnAddCustomProductClicked" />
             <!-- Кнопки действий -->
             <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                 <Button Grid.Column="0"
