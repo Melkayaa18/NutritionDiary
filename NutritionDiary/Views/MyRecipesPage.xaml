@@ -44,44 +44,77 @@
                                Padding="15"
                                CornerRadius="10"
                                HasShadow="True">
-                            <Grid ColumnDefinitions="*,Auto" 
-                                  RowDefinitions="Auto,Auto,Auto,Auto">
+                            <VerticalStackLayout Spacing="10">
 
-                                <!-- Название и категория -->
-                                <Label Grid.Row="0" Grid.Column="0"
-                                       Text="{Binding Title}"
-                                       TextColor="Black"
-                                       FontSize="16"
-                                       FontAttributes="Bold" />
+                                <!-- Фото рецепта (раскомментируйте когда будете готовы) -->
+                                <!--
+                                <Frame BackgroundColor="#F5F5F5"
+                                       Padding="0"
+                                       CornerRadius="5"
+                                       HeightRequest="100"
+                                       HorizontalOptions="FillAndExpand">
+                                    <Image Source="{Binding ImagePath}"
+                                           Aspect="AspectFill"
+                                           HorizontalOptions="FillAndExpand"
+                                           VerticalOptions="FillAndExpand">
+                                        <Image.Source>
+                                            <FontImageSource Glyph="🍳"
+                                                             FontFamily="MaterialDesignIcons"
+                                                             Size="40"
+                                                             Color="LightGray" />
+                                        </Image.Source>
+                                    </Image>
+                                </Frame>
+                                -->
 
-                                <Label Grid.Row="0" Grid.Column="1"
-                                       Text="{Binding Category}"
-                                       FontSize="10"
-                                       TextColor="White"
-                                       BackgroundColor="#2196F3"
-                                       Padding="8,4"
-                                       HorizontalOptions="End" />
+                                <Grid ColumnDefinitions="*,Auto" 
+                                      RowDefinitions="Auto,Auto,Auto,Auto">
 
-                                <!-- Описание -->
-                                <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
-                                       Text="{Binding Description}"
-                                       FontSize="12"
-                                       TextColor="Gray"
-                                       MaxLines="2"
-                                       LineBreakMode="TailTruncation" />
+                                    <!-- Название и категория -->
+                                    <Label Grid.Row="0" Grid.Column="0"
+                                           Text="{Binding Title}"
+                                           TextColor="Black"
+                                           FontSize="16"
+                                           FontAttributes="Bold" />
 
-                                <!-- Пищевая ценность -->
-                                <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
-                                       Text="{Binding NutritionInfo}"
-                                       FontSize="11"
-                                       TextColor="DarkGray" />
+                                    <Label Grid.Row="0" Grid.Column="1"
+                                           Text="{Binding Category}"
+                                           FontSize="10"
+                                           TextColor="White"
+                                           BackgroundColor="#2196F3"
+                                           Padding="8,4"
+                                           HorizontalOptions="End" />
 
-                                <!-- Время приготовления -->
-                                <Label Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
-                                       Text="{Binding CookingTimeInfo}"
-                                       FontSize="10"
-                                       TextColor="Gray" />
-                            </Grid>
+                                    <!-- Описание -->
+                                    <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                           Text="{Binding Description}"
+                                           FontSize="12"
+                                           TextColor="Gray"
+                                           MaxLines="2"
+                                           LineBreakMode="TailTruncation" />
+
+                                    <!-- Пищевая ценность -->
+                                    <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                           Text="{Binding NutritionInfo}"
+                                           FontSize="11"
+                                           TextColor="DarkGray" />
+
+                                    <!-- Время приготовления -->
+                                    <Label Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+                                           Text="{Binding CookingTimeInfo}"
+                                           FontSize="10"
+                                           TextColor="Gray" />
+                                </Grid>
+
+                                <!-- Кнопка просмотра деталей - ДОБАВЛЕНО ВНУТРИ ШАБЛОНА -->
+                                <Button Text="👁️ Посмотреть рецепт"
+                                        BackgroundColor="#2196F3"
+                                        TextColor="White"
+                                        FontSize="12"
+                                        Clicked="OnViewRecipeClicked"
+                                        CommandParameter="{Binding .}" />
+
+                            </VerticalStackLayout>
                         </Frame>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>

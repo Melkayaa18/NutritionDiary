@@ -2,11 +2,13 @@ using System.Formats.Tar;
 using NutritionDiary.Models;
 using NutritionDiary.Services;
 namespace NutritionDiary.Views;
-
+using Microsoft.Maui.Media;
+using Microsoft.Maui.Storage;
 public partial class AddRecipePage : ContentPage
 {
     private DatabaseHelper _dbHelper;
     private int _userId;
+    private string _selectedImagePath;
     public AddRecipePage(int userId)
 	{
 		InitializeComponent();
@@ -121,6 +123,50 @@ public partial class AddRecipePage : ContentPage
 
 
 
+    private async void OnAddPhotoClicked(object sender, EventArgs e)
+    {
+        try
+        {
+            // Альтернативный способ с FilePicker
+            var result = await FilePicker.Default.PickAsync(new PickOptions
+            {
+                PickerTitle = "Выберите фото для рецепта",
+                FileTypes = FilePickerFileType.Images
+            });
+
+            if (result != null)
+            {
+                // Сохраняем путь к фото
+                _selectedImagePath = result.FullPath;
+
+                // Отображаем фото
+                RecipeImage.Source = ImageSource.FromFile(_selectedImagePath);
+                ImageFrame.IsVisible = true;
+                RemovePhotoButton.IsVisible = true;
+                AddPhotoButton.Text = "?? Изменить фото";
+
+                await DisplayAlert("Успех", "Фото успешно добавлено!", "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Ошибка", $"Не удалось выбрать фото: {ex.Message}", "OK");
+            System.Diagnostics.Debug.WriteLine($"Ошибка выбора фото: {ex.Message}");
+        }
+    }
+
+    private void OnRemovePhotoClicked(object sender, EventArgs e)
+    {
+        // Удаляем фото
+        _selectedImagePath = null;
+        RecipeImage.Source = null;
+        ImageFrame.IsVisible = false;
+        RemovePhotoButton.IsVisible = false;
+        AddPhotoButton.Text = "?? Добавить фото";
+    }
+    
+    
+}
 
     //private async void OnAddPhotoClicked(object sender, EventArgs e)
     //{
@@ -138,4 +184,4 @@ public partial class AddRecipePage : ContentPage
     //        await DisplayAlert("Ошибка", "Не удалось выбрать фото", "OK");
     //    }
     //}
-}
+

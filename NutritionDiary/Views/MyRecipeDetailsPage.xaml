@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage x:Class="NutritionDiary.Views.MyRecipeDetailsPage"
+             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             Title="Детали рецепта">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="15" Padding="20">
+
+            <!-- Фото рецепта -->
+            <Frame BackgroundColor="#F5F5F5"
+                   Padding="0"
+                   CornerRadius="10"
+                   HeightRequest="200"
+                   HorizontalOptions="FillAndExpand">
+                <Image x:Name="RecipeImage"
+                       Aspect="AspectFill"
+                       HorizontalOptions="FillAndExpand"
+                       VerticalOptions="FillAndExpand">
+                    <Image.Source>
+                        <FontImageSource Glyph="🍳"
+                                         FontFamily="MaterialDesignIcons"
+                                         Size="60"
+                                         Color="LightGray" />
+                    </Image.Source>
+                </Image>
+            </Frame>
+
+            <!-- Основная информация -->
+            <Frame BackgroundColor="White"
+                   Padding="15"
+                   CornerRadius="10">
+                <VerticalStackLayout Spacing="10">
+                    <Label x:Name="TitleLabel"
+                           FontSize="20"
+                           FontAttributes="Bold"
+                           TextColor="Black" />
+
+                    <Label x:Name="CategoryLabel"
+                           FontSize="14"
+                           TextColor="Gray" />
+
+                    <Label x:Name="DescriptionLabel"
+                           FontSize="14"
+                           TextColor="DarkSlateGray" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Пищевая ценность -->
+            <Frame BackgroundColor="#E8F5E8"
+                   Padding="15"
+                   CornerRadius="10">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="⚡ Пищевая ценность на порцию"
+                           FontAttributes="Bold"
+                           TextColor="Black" />
+
+                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto">
+                        <Label Grid.Row="0" Grid.Column="0" Text="Калории:" TextColor="Black" />
+                        <Label x:Name="CaloriesLabel" Grid.Row="0" Grid.Column="1" TextColor="Black" />
+
+                        <Label Grid.Row="1" Grid.Column="0" Text="Белки:" TextColor="Black" />
+                        <Label x:Name="ProteinLabel" Grid.Row="1" Grid.Column="1" TextColor="Black" />
+
+                        <Label Grid.Row="2" Grid.Column="0" Text="Жиры:" TextColor="Black" />
+                        <Label x:Name="FatLabel" Grid.Row="2" Grid.Column="1" TextColor="Black" />
+
+                        <Label Grid.Row="3" Grid.Column="0" Text="Углеводы:" TextColor="Black" />
+                        <Label x:Name="CarbsLabel" Grid.Row="3" Grid.Column="1" TextColor="Black" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Время приготовления -->
+            <Frame BackgroundColor="#FFF3E0"
+                   Padding="15"
+                   CornerRadius="10">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="⏱️ Время приготовления"
+                           FontAttributes="Bold"
+                           TextColor="Black" />
+                    <Label x:Name="CookingTimeLabel" TextColor="Black" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Ингредиенты -->
+            <Frame BackgroundColor="White"
+                   Padding="15"
+                   CornerRadius="10">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="🛒 Ингредиенты"
+                           FontAttributes="Bold"
+                           TextColor="Black" />
+                    <Label x:Name="IngredientsLabel"
+                           TextColor="DarkSlateGray" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Шаги приготовления -->
+            <Frame BackgroundColor="White"
+                   Padding="15"
+                   CornerRadius="10">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="👩‍🍳 Шаги приготовления"
+                           FontAttributes="Bold"
+                           TextColor="Black" />
+                    <Label x:Name="CookingStepsLabel"
+                           TextColor="DarkSlateGray" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Кнопки действий -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <Button Grid.Column="0"
+                        Text="✏️ Редактировать"
+                        BackgroundColor="#FF9800"
+                        TextColor="White"
+                        Clicked="OnEditClicked" />
+
+                <Button Grid.Column="1"
+                        Text="🗑️ Удалить"
+                        BackgroundColor="#F44336"
+                        TextColor="White"
+                        Clicked="OnDeleteClicked" />
+            </Grid>
+
+            <Button Text="← Назад к моим рецептам"
+                    BackgroundColor="Gray"
+                    TextColor="White"
+                    Clicked="OnBackClicked" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

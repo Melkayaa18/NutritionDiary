@@ -97,4 +97,22 @@ public partial class MyRecipesPage : ContentPage
         // Обновляем список при возвращении на страницу
         LoadMyRecipes();
     }
+    private async void OnViewRecipeClicked(object sender, EventArgs e)
+    {
+        try
+        {
+            var button = sender as Button;
+            var recipe = button?.CommandParameter as Recipe;
+
+            if (recipe != null)
+            {
+                await Navigation.PushAsync(new MyRecipeDetailsPage(recipe));
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Ошибка", $"Не удалось открыть рецепт: {ex.Message}", "OK");
+            System.Diagnostics.Debug.WriteLine($"Ошибка открытия рецепта: {ex.Message}");
+        }
+    }
 }

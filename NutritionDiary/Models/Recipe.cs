@@ -16,10 +16,10 @@ namespace NutritionDiary.Models
         public decimal ProteinPerServing { get; set; }
         public decimal FatPerServing { get; set; }
         public decimal CarbsPerServing { get; set; }
-        public string ImagePath { get; set; }
+        public string ImagePath { get; set; } // Убедитесь, что это свойство есть
         public string CookingSteps { get; set; }
         public bool IsActive { get; set; }
-        public int CookingTime { get; set; } // в минутах
+        public int CookingTime { get; set; }
         public List<string> Tags { get; set; } = new List<string>();
         public int CreatedByUserId { get; set; }
 
@@ -28,6 +28,7 @@ namespace NutritionDiary.Models
             $"⚡ {CaloriesPerServing} ккал • 🥚 {ProteinPerServing}г • 🥑 {FatPerServing}г • 🌾 {CarbsPerServing}г";
 
         public string CookingTimeInfo =>
-       CookingTime > 0 ? $"⏱️ {CookingTime} мин" : "⏱️ Время не указано";
+            CookingTime > 0 ? $"⏱️ {CookingTime} мин" : "⏱️ Время не указано";
     }
 }
+

@@ -613,14 +613,13 @@ namespace NutritionDiary.Services
                 using var conn = GetConnection();
                 await conn.OpenAsync();
 
-                // ИСПРАВЛЕННЫЙ ЗАПРОС - добавил CreatedByUserId обратно
                 string query = @"
         INSERT INTO Recipes 
             (Title, Description, Category, CaloriesPerServing, ProteinPerServing, 
-             FatPerServing, CarbsPerServing, CookingSteps, IsActive, CreatedByUserId)
+             FatPerServing, CarbsPerServing, ImagePath, CookingSteps, IsActive, CreatedByUserId)
         VALUES 
             (@Title, @Description, @Category, @Calories, @Protein, 
-             @Fat, @Carbs, @CookingSteps, 1, @UserId)";
+             @Fat, @Carbs, @ImagePath, @CookingSteps, 1, @UserId)";
 
                 using var cmd = new SqlCommand(query, conn);
                 cmd.Parameters.AddWithValue("@Title", recipe.Title);
@@ -630,6 +629,7 @@ namespace NutritionDiary.Services
                 cmd.Parameters.AddWithValue("@Protein", recipe.ProteinPerServing);
                 cmd.Parameters.AddWithValue("@Fat", recipe.FatPerServing);
                 cmd.Parameters.AddWithValue("@Carbs", recipe.CarbsPerServing);
+                cmd.Parameters.AddWithValue("@ImagePath", recipe.ImagePath ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@CookingSteps", recipe.CookingSteps ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@UserId", recipe.CreatedByUserId);
 
@@ -653,17 +653,16 @@ namespace NutritionDiary.Services
                 using var conn = GetConnection();
                 await conn.OpenAsync();
 
-               
                 string query = @"
         SELECT RecipeId, Title, Description, Category, CaloriesPerServing, 
-               ProteinPerServing, FatPerServing, CarbsPerServing, CookingSteps, 
-               IsActive, CreatedByUserId
+               ProteinPerServing, FatPerServing, CarbsPerServing, ImagePath,
+               CookingSteps, IsActive, CreatedByUserId
         FROM Recipes 
         WHERE CreatedByUserId = @UserId AND IsActive = 1
         ORDER BY Title";
 
                 using var cmd = new SqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@UserId", userId); 
+                cmd.Parameters.AddWithValue("@UserId", userId);
 
                 using var reader = await cmd.ExecuteReaderAsync();
                 while (await reader.ReadAsync())
@@ -678,9 +677,10 @@ namespace NutritionDiary.Services
                         ProteinPerServing = reader.IsDBNull(5) ? 0 : reader.GetDecimal(5),
                         FatPerServing = reader.IsDBNull(6) ? 0 : reader.GetDecimal(6),
                         CarbsPerServing = reader.IsDBNull(7) ? 0 : reader.GetDecimal(7),
-                        CookingSteps = reader.IsDBNull(8) ? "" : reader.GetString(8),
-                        IsActive = reader.GetBoolean(9),
-                        CreatedByUserId = reader.IsDBNull(10) ? 0 : reader.GetInt32(10) 
+                        ImagePath = reader.IsDBNull(8) ? "" : reader.GetString(8), // Загружаем путь к фото
+                        CookingSteps = reader.IsDBNull(9) ? "" : reader.GetString(9),
+                        IsActive = reader.GetBoolean(10),
+                        CreatedByUserId = reader.IsDBNull(11) ? 0 : reader.GetInt32(11)
                     });
                 }
             }
