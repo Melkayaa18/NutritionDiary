@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,7 +11,7 @@ namespace NutritionDiary.Models
     public class Product
     {
         public int ProductId { get; set; }
-        public string Name { get; set; } = string.Empty; // Инициализация по умолчанию
+        public string Name { get; set; } = string.Empty;
         public decimal CaloriesPer100g { get; set; }
         public decimal ProteinPer100g { get; set; }
         public decimal FatPer100g { get; set; }
@@ -19,13 +21,27 @@ namespace NutritionDiary.Models
         public int CreatedByUserId { get; set; }
 
         // Вычисляемое свойство для отображения
-        public string DisplayName
+        public string DisplayName => $"{Name} ({CaloriesPer100g} ккал/100г)";
+
+        private bool _isSelected;
+        public bool IsSelected
         {
-            get
+            get => _isSelected;
+            set
             {
-                var name = string.IsNullOrEmpty(Name) ? "Без названия" : Name;
-                return $"{name} ({CaloriesPer100g} ккал/100г)";
+                if (_isSelected != value)
+                {
+                    _isSelected = value;
+                    OnPropertyChanged();
+                }
             }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

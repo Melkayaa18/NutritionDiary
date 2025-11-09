@@ -13,12 +13,6 @@
                    FontAttributes="Bold"
                    HorizontalOptions="Center" />
 
-            <!-- Выбор продукта -->
-            <!--<Label Text="Продукт:" />-->
-            <!--<Picker x:Name="ProductPicker"-->
-            <!--Title="Выберите продукт"-->
-            <!--ItemDisplayBinding="{Binding Name}" />-->
-
             <!-- Поиск продукта -->
             <Label Text="Поиск продукта:" />
             <SearchBar x:Name="ProductSearchBar"
@@ -28,43 +22,66 @@
                       BackgroundColor="White" />
 
             <!-- Список продуктов -->
+            <Label Text="Выберите продукт:" />
             <ListView x:Name="ProductsListView"
-          HeightRequest="200"
-                      
-          ItemSelected="OnProductSelectedFromList"
-          HasUnevenRows="True">
+                      HeightRequest="200"
+                      ItemSelected="OnProductSelectedFromList"
+                      HasUnevenRows="True">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <ViewCell>
-                            <Grid Padding="15,10" BackgroundColor="White">
+                            <Grid Padding="15,10" 
+                                  BackgroundColor="{Binding IsSelected, Converter={x:StaticResource SelectedColorConverter}}">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
                                 <VerticalStackLayout Grid.Column="0" Spacing="2">
                                     <Label Text="{Binding Name}" 
-                                    TextColor="Black"
-                               FontSize="14" 
-                               FontAttributes="Bold" />
+                                           FontSize="14" 
+                                           FontAttributes="Bold"
+                                           TextColor="{Binding IsSelected, Converter={x:StaticResource TextColorConverter}}" />
                                     <Label Text="{Binding CaloriesPer100g, StringFormat='{0} ккал/100г'}" 
-                               FontSize="12" 
-                               
-                               TextColor="Gray" />
+                                           FontSize="12" 
+                                           TextColor="{Binding IsSelected, Converter={x:StaticResource SubtextColorConverter}}" />
                                 </VerticalStackLayout>
 
                                 <Label Grid.Column="1" 
-                                       
-                           Text="✅" 
-                           FontSize="16" 
-                           TextColor="Black"
-                           IsVisible="{Binding IsSelected}" />
+                                       Text="✅" 
+                                       FontSize="16" 
+                                       IsVisible="{Binding IsSelected}" />
                             </Grid>
                         </ViewCell>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-
+            
+            <Label Text="Выбранный продукт:" />
+            
+            <!-- Выбранный продукт -->
+            <Frame x:Name="SelectedProductFrame"
+                   BackgroundColor="#E8F5E8"
+                   Padding="15"
+                   CornerRadius="10"
+                   IsVisible="False">
+                <HorizontalStackLayout Spacing="10">
+                    <Label Text="✅" 
+                           FontSize="16"
+                           VerticalOptions="Center" />
+                    <VerticalStackLayout Spacing="2">
+                        <Label x:Name="SelectedProductName"
+                               Text="Название продукта"
+                               TextColor="Black"
+                               FontSize="14"
+                               FontAttributes="Bold" />
+                        <Label x:Name="SelectedProductCalories"
+                               Text="0 ккал/100г"
+                               FontSize="12"
+                               TextColor="Gray" />
+                    </VerticalStackLayout>
+                </HorizontalStackLayout>
+            </Frame>
 
             <!-- Количество -->
             <Label Text="Количество (граммы):" />
@@ -74,12 +91,12 @@
 
             <!-- Питательная ценность -->
             <Frame BackgroundColor="White"
-       Padding="15"
-       CornerRadius="10">
+                   Padding="15"
+                   CornerRadius="10">
                 <VerticalStackLayout Spacing="8">
                     <Label Text="Питательная ценность:" 
                            TextColor="DarkSlateGrey"
-               FontAttributes="Bold" />
+                           FontAttributes="Bold" />
 
                     <Grid>
                         <Grid.RowDefinitions>
@@ -107,13 +124,15 @@
                     </Grid>
                 </VerticalStackLayout>
             </Frame>
+
             <!-- Кнопка создания своего продукта -->
             <Button x:Name="AddCustomProductButton"
-        Text="➕ Создать свой продукт"
-        BackgroundColor="#4682B4"
-        TextColor="White"
-        Margin="0,10,0,0"
-        Clicked="OnAddCustomProductClicked" />
+                    Text="➕ Создать свой продукт"
+                    BackgroundColor="#4682B4"
+                    TextColor="White"
+                    Margin="0,10,0,0"
+                    Clicked="OnAddCustomProductClicked" />
+
             <!-- Кнопки действий -->
             <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                 <Button Grid.Column="0"
@@ -131,5 +150,4 @@
 
         </VerticalStackLayout>
     </ScrollView>
-
 </ContentPage>

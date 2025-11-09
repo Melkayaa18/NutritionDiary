@@ -177,6 +177,17 @@ public partial class RecipesPage : ContentPage
         }
     }
 
+    private async void OnFilterRecipesClicked(object sender, EventArgs e)
+    {
+        try
+        {
+            await Navigation.PushAsync(new RecipeFilterPage());
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Ошибка", $"Не удалось открыть фильтры: {ex.Message}", "OK");
+        }
+    }
     private async void OnDailyRecipeClicked(object sender, EventArgs e)
     {
         await Navigation.PushAsync(new RecipeDetailsPage(_dailyRecipe));

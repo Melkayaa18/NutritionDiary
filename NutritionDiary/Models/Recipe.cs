@@ -19,9 +19,14 @@ namespace NutritionDiary.Models
         public string ImagePath { get; set; }
         public string CookingSteps { get; set; }
         public bool IsActive { get; set; }
+        public int CookingTime { get; set; } // в минутах
+        public List<string> Tags { get; set; } = new List<string>();
 
-        // Добавим вычисляемое свойство для отображения
+        // Вычисляемые свойства
         public string NutritionInfo =>
             $"⚡ {CaloriesPerServing} ккал • 🥚 {ProteinPerServing}г • 🥑 {FatPerServing}г • 🌾 {CarbsPerServing}г";
+
+        public string CookingTimeInfo =>
+            CookingTime > 0 ? $"⏱️ {CookingTime} мин" : "⏱️ Время не указано";
     }
 }

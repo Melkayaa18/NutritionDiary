@@ -46,6 +46,15 @@
 
             <VerticalStackLayout x:Name="CategoriesLayout" Spacing="10" />
 
+            <!-- Добавьте эту кнопку после заголовка или в любое удобное место -->
+            <Button Text="🔍 Поиск рецепта по фильтру"
+        Clicked="OnFilterRecipesClicked"
+        BackgroundColor="#FF9800"
+        TextColor="White"
+        FontAttributes="Bold"
+        CornerRadius="10"
+        Margin="0,10,0,20" />
+
         </VerticalStackLayout>
     </ScrollView>
 

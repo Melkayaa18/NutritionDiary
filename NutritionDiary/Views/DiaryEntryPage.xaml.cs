@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using NutritionDiary.Converters;
 using NutritionDiary.Models;
 using NutritionDiary.Services;
 
@@ -12,11 +13,17 @@ public partial class DiaryEntryPage : ContentPage
     private string _mealTypeName;
     private List<Product> _allProducts;
     private ObservableCollection<Product> _filteredProducts;
+    private Product _selectedProduct;
     public DiaryEntryPage(int mealTypeId, string mealTypeName)
 	{
         try
         {
             InitializeComponent();
+
+            // Регистрируем конвертеры ресурсов
+            Resources.Add("SelectedColorConverter", new SelectedColorConverter());
+            Resources.Add("TextColorConverter", new TextColorConverter());
+            Resources.Add("SubtextColorConverter", new SubtextColorConverter());
 
             _dbHelper = new DatabaseHelper();
             _userId = Preferences.Get("UserId", 0);
@@ -134,6 +141,14 @@ public partial class DiaryEntryPage : ContentPage
         {
             var searchText = e.NewTextValue ?? string.Empty;
 
+            // Сбрасываем выделение при поиске
+            if (_selectedProduct != null)
+            {
+                _selectedProduct.IsSelected = false;
+                _selectedProduct = null;
+                SelectedProductFrame.IsVisible = false;
+            }
+
             if (string.IsNullOrWhiteSpace(searchText))
             {
                 // Если поиск пустой - показываем все продукты
@@ -171,12 +186,28 @@ public partial class DiaryEntryPage : ContentPage
     {
         try
         {
-            if (e.SelectedItem is Product selectedProduct)
+            // Снимаем выделение с предыдущего продукта
+            if (_selectedProduct != null)
             {
-                System.Diagnostics.Debug.WriteLine($"Выбран продукт: {selectedProduct.Name}");
-                
-                // Можно добавить подсветку выбранного элемента если нужно
+                _selectedProduct.IsSelected = false;
+            }
+
+            // Устанавливаем выделение на новый продукт
+            _selectedProduct = e.SelectedItem as Product;
+            if (_selectedProduct != null)
+            {
+                _selectedProduct.IsSelected = true;
+                System.Diagnostics.Debug.WriteLine($"Выбран продукт: {_selectedProduct.Name}");
+
+                // Обновляем отображение выбранного продукта
+                UpdateSelectedProductDisplay();
+
                 CalculateNutrition();
+            }
+            else
+            {
+                // Если продукт не выбран, скрываем блок
+                SelectedProductFrame.IsVisible = false;
             }
         }
         catch (Exception ex)
@@ -184,6 +215,20 @@ public partial class DiaryEntryPage : ContentPage
             System.Diagnostics.Debug.WriteLine($"Ошибка выбора продукта: {ex.Message}");
         }
     }
+    private void UpdateSelectedProductDisplay()
+    {
+        if (_selectedProduct != null)
+        {
+            SelectedProductName.Text = _selectedProduct.Name;
+            SelectedProductCalories.Text = $"{_selectedProduct.CaloriesPer100g} ккал/100г";
+            SelectedProductFrame.IsVisible = true;
+        }
+        else
+        {
+            SelectedProductFrame.IsVisible = false;
+        }
+    }
+
     private async void OnAddCustomProductClicked(object sender, EventArgs e)
     {
         try
@@ -216,16 +261,14 @@ public partial class DiaryEntryPage : ContentPage
         {
             System.Diagnostics.Debug.WriteLine("=== CalculateNutrition called ===");
 
-            // Проверяем выбран ли продукт из ListView
-            var selectedProduct = ProductsListView.SelectedItem as Product;
-            if (selectedProduct == null)
+            // Проверяем выбран ли продукт
+            if (_selectedProduct == null)
             {
                 System.Diagnostics.Debug.WriteLine("Продукт не выбран");
                 ResetNutritionLabels();
                 return;
             }
 
-            // Проверяем введено ли количество
             if (string.IsNullOrEmpty(QuantityEntry.Text) || !decimal.TryParse(QuantityEntry.Text, out decimal grams) || grams <= 0)
             {
                 System.Diagnostics.Debug.WriteLine($"Некорректное количество: {QuantityEntry.Text}");
@@ -233,19 +276,16 @@ public partial class DiaryEntryPage : ContentPage
                 return;
             }
 
-            System.Diagnostics.Debug.WriteLine($"Выбран продукт: {selectedProduct.Name}, Количество: {grams}г");
+            System.Diagnostics.Debug.WriteLine($"Выбран продукт: {_selectedProduct.Name}, Количество: {grams}г");
 
-            // Рассчитываем питательную ценность
             decimal ratio = grams / 100.0m;
-
-            decimal calories = selectedProduct.CaloriesPer100g * ratio;
-            decimal protein = selectedProduct.ProteinPer100g * ratio;
-            decimal fat = selectedProduct.FatPer100g * ratio;
-            decimal carbs = selectedProduct.CarbsPer100g * ratio;
+            decimal calories = _selectedProduct.CaloriesPer100g * ratio;
+            decimal protein = _selectedProduct.ProteinPer100g * ratio;
+            decimal fat = _selectedProduct.FatPer100g * ratio;
+            decimal carbs = _selectedProduct.CarbsPer100g * ratio;
 
             System.Diagnostics.Debug.WriteLine($"Рассчитано - Калории: {calories}, Белки: {protein}, Жиры: {fat}, Углеводы: {carbs}");
 
-            // Обновляем UI
             UpdateNutritionLabels(calories, protein, fat, carbs);
 
         }
@@ -296,16 +336,14 @@ public partial class DiaryEntryPage : ContentPage
         {
             System.Diagnostics.Debug.WriteLine("=== НАЧАЛО OnSaveClicked ===");
 
-            // Проверяем авторизацию пользователя
             if (_userId == 0)
             {
                 await DisplayAlert("Ошибка", "Для сохранения записей необходимо войти в систему", "OK");
                 return;
             }
 
-            // Проверяем выбран ли продукт из ListView
-            var selectedProduct = ProductsListView.SelectedItem as Product;
-            if (selectedProduct == null)
+            // Проверяем выбран ли продукт
+            if (_selectedProduct == null)
             {
                 await DisplayAlert("Ошибка", "Выберите продукт из списка", "OK");
                 return;
@@ -317,17 +355,16 @@ public partial class DiaryEntryPage : ContentPage
                 return;
             }
 
-            System.Diagnostics.Debug.WriteLine($"Сохранение: {selectedProduct.Name}, {grams}г");
+            System.Diagnostics.Debug.WriteLine($"Сохранение: {_selectedProduct.Name}, {grams}г");
 
-            // Рассчитываем питательную ценность
             decimal ratio = grams / 100.0m;
-            decimal calories = selectedProduct.CaloriesPer100g * ratio;
-            decimal protein = selectedProduct.ProteinPer100g * ratio;
-            decimal fat = selectedProduct.FatPer100g * ratio;
-            decimal carbs = selectedProduct.CarbsPer100g * ratio;
+            decimal calories = _selectedProduct.CaloriesPer100g * ratio;
+            decimal protein = _selectedProduct.ProteinPer100g * ratio;
+            decimal fat = _selectedProduct.FatPer100g * ratio;
+            decimal carbs = _selectedProduct.CarbsPer100g * ratio;
 
             bool success = await _dbHelper.AddDiaryEntry(
-                _userId, _mealTypeId, selectedProduct.ProductId, grams,
+                _userId, _mealTypeId, _selectedProduct.ProductId, grams,
                 calories, protein, fat, carbs
             );
 
