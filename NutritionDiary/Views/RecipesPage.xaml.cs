@@ -6,11 +6,12 @@ namespace NutritionDiary.Views;
 public partial class RecipesPage : ContentPage
 {
     private RecipeData _dailyRecipe;
-
+    private int _userId;
     public RecipesPage()
 	{
 		InitializeComponent();
         LoadDailyRecipe();
+        _userId = Preferences.Get("UserId", 0);
         LoadCategories();
     }
     private async void LoadDailyRecipe()
@@ -196,5 +197,41 @@ public partial class RecipesPage : ContentPage
     private async void OnCategoryClicked(string categoryName)
     {
         await Navigation.PushAsync(new CategoryRecipesPage(categoryName));
+    }
+
+    private async void OnAddRecipeClicked(object sender, EventArgs e)
+    {
+        try
+        {
+            if (_userId == 0)
+            {
+                await DisplayAlert("Вход required", "Для добавления рецептов необходимо войти в систему", "OK");
+                return;
+            }
+
+            await Navigation.PushAsync(new AddRecipePage(_userId));
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Ошибка", $"Не удалось открыть страницу добавления рецепта: {ex.Message}", "OK");
+        }
+    }
+
+    private async void OnMyRecipesClicked(object sender, EventArgs e)
+    {
+        try
+        {
+            if (_userId == 0)
+            {
+                await DisplayAlert("Вход required", "Для просмотра рецептов необходимо войти в систему", "OK");
+                return;
+            }
+
+            await Navigation.PushAsync(new MyRecipesPage(_userId));
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Ошибка", $"Не удалось открыть страницу моих рецептов: {ex.Message}", "OK");
+        }
     }
 }

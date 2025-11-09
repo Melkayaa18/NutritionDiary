@@ -606,6 +606,94 @@ namespace NutritionDiary.Services
 
 
 
+        public async Task<bool> AddRecipe(Recipe recipe)
+        {
+            try
+            {
+                using var conn = GetConnection();
+                await conn.OpenAsync();
+
+                // ИСПРАВЛЕННЫЙ ЗАПРОС - добавил CreatedByUserId обратно
+                string query = @"
+        INSERT INTO Recipes 
+            (Title, Description, Category, CaloriesPerServing, ProteinPerServing, 
+             FatPerServing, CarbsPerServing, CookingSteps, IsActive, CreatedByUserId)
+        VALUES 
+            (@Title, @Description, @Category, @Calories, @Protein, 
+             @Fat, @Carbs, @CookingSteps, 1, @UserId)";
+
+                using var cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@Title", recipe.Title);
+                cmd.Parameters.AddWithValue("@Description", recipe.Description ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@Category", recipe.Category);
+                cmd.Parameters.AddWithValue("@Calories", recipe.CaloriesPerServing);
+                cmd.Parameters.AddWithValue("@Protein", recipe.ProteinPerServing);
+                cmd.Parameters.AddWithValue("@Fat", recipe.FatPerServing);
+                cmd.Parameters.AddWithValue("@Carbs", recipe.CarbsPerServing);
+                cmd.Parameters.AddWithValue("@CookingSteps", recipe.CookingSteps ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@UserId", recipe.CreatedByUserId);
+
+                var result = await cmd.ExecuteNonQueryAsync();
+                return result > 0;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка добавления рецепта: {ex.Message}");
+                return false;
+            }
+        }
+
+        // Получение рецептов пользователя
+        public async Task<List<Recipe>> GetRecipesByUserId(int userId)
+        {
+            var recipes = new List<Recipe>();
+
+            try
+            {
+                using var conn = GetConnection();
+                await conn.OpenAsync();
+
+               
+                string query = @"
+        SELECT RecipeId, Title, Description, Category, CaloriesPerServing, 
+               ProteinPerServing, FatPerServing, CarbsPerServing, CookingSteps, 
+               IsActive, CreatedByUserId
+        FROM Recipes 
+        WHERE CreatedByUserId = @UserId AND IsActive = 1
+        ORDER BY Title";
+
+                using var cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@UserId", userId); 
+
+                using var reader = await cmd.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    recipes.Add(new Recipe
+                    {
+                        RecipeId = reader.GetInt32(0),
+                        Title = reader.GetString(1),
+                        Description = reader.IsDBNull(2) ? "" : reader.GetString(2),
+                        Category = reader.IsDBNull(3) ? "" : reader.GetString(3),
+                        CaloriesPerServing = reader.IsDBNull(4) ? 0 : reader.GetDecimal(4),
+                        ProteinPerServing = reader.IsDBNull(5) ? 0 : reader.GetDecimal(5),
+                        FatPerServing = reader.IsDBNull(6) ? 0 : reader.GetDecimal(6),
+                        CarbsPerServing = reader.IsDBNull(7) ? 0 : reader.GetDecimal(7),
+                        CookingSteps = reader.IsDBNull(8) ? "" : reader.GetString(8),
+                        IsActive = reader.GetBoolean(9),
+                        CreatedByUserId = reader.IsDBNull(10) ? 0 : reader.GetInt32(10) 
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка получения рецептов пользователя: {ex.Message}");
+            }
+
+            return recipes;
+        }
+
+
+
 
 
 

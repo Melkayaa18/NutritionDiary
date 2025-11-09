@@ -21,12 +21,13 @@ namespace NutritionDiary.Models
         public bool IsActive { get; set; }
         public int CookingTime { get; set; } // в минутах
         public List<string> Tags { get; set; } = new List<string>();
+        public int CreatedByUserId { get; set; }
 
         // Вычисляемые свойства
         public string NutritionInfo =>
             $"⚡ {CaloriesPerServing} ккал • 🥚 {ProteinPerServing}г • 🥑 {FatPerServing}г • 🌾 {CarbsPerServing}г";
 
         public string CookingTimeInfo =>
-            CookingTime > 0 ? $"⏱️ {CookingTime} мин" : "⏱️ Время не указано";
+       CookingTime > 0 ? $"⏱️ {CookingTime} мин" : "⏱️ Время не указано";
     }
 }

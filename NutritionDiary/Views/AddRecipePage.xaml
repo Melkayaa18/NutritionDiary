@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage x:Class="NutritionDiary.Views.AddRecipePage"
+             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             Title="Добавить рецепт">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="15" Padding="20">
+
+            <Label Text="Создание нового рецепта"
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center" />
+
+            <!-- Основная информация -->
+            <Frame BackgroundColor="White"
+                   Padding="15"
+                   CornerRadius="10">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="📝 Основная информация"
+                           TextColor="Black"
+                           FontAttributes="Bold" />
+
+                    <Label Text="Название рецепта:"
+                           TextColor="Black"/>
+                    <Entry x:Name="TitleEntry" 
+                           Placeholder="Введите название рецепта"
+                           BackgroundColor="LightGrey"
+                           TextColor="Black"/>
+
+                    <Label Text="Категория:"
+                           TextColor="Black"/>
+                    <Picker x:Name="CategoryPicker"
+                            BackgroundColor="LightGray">
+                        <Picker.Items>
+                            <x:String>Завтрак</x:String>
+                            <x:String>Обед</x:String>
+                            <x:String>Ужин</x:String>
+                            <x:String>Перекус</x:String>
+                            <x:String>Десерт</x:String>
+                            <x:String>Напиток</x:String>
+                        </Picker.Items>
+                    </Picker>
+
+                    <Label Text="Описание:"
+                           TextColor="Black"/>
+                    <Editor x:Name="DescriptionEditor" 
+                            Placeholder="Опишите ваш рецепт..."
+                            BackgroundColor="LightGray"
+                            HeightRequest="80" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Пищевая ценность -->
+            <Frame BackgroundColor="White"
+                   Padding="15"
+                   CornerRadius="10">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="⚡ Пищевая ценность на порцию"
+                           TextColor="Black"
+                           FontAttributes="Bold" />
+
+                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto">
+                        <Label Grid.Row="0" Grid.Column="0" Text="Калории (ккал):"
+                               TextColor="Black"/>
+                        <Entry x:Name="CaloriesEntry" 
+                               Grid.Row="0" Grid.Column="1" 
+                               BackgroundColor="LightGray"
+                               Text="0" 
+                               Keyboard="Numeric" />
+
+                        <Label Grid.Row="1" Grid.Column="0" Text="Белки (г):"
+                               TextColor="Black"/>
+                        <Entry x:Name="ProteinEntry" 
+                               Grid.Row="1" Grid.Column="1" 
+                               BackgroundColor="LightGray"
+                               Text="0" 
+                               Keyboard="Numeric" />
+
+                        <Label Grid.Row="2" Grid.Column="0" Text="Жиры (г):"
+                               TextColor="Black"/>
+                        <Entry x:Name="FatEntry" 
+                               BackgroundColor="LightGray"
+                               Grid.Row="2" Grid.Column="1" 
+                               Text="0" 
+                               Keyboard="Numeric" />
+
+                        <Label Grid.Row="3" Grid.Column="0" Text="Углеводы (г):"
+                               TextColor="Black"/>
+                        <Entry x:Name="CarbsEntry" 
+                               BackgroundColor="LightGray"
+                               Grid.Row="3" Grid.Column="1" 
+                               Text="0" 
+                               Keyboard="Numeric" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Ингредиенты -->
+            <Frame BackgroundColor="White"
+                   Padding="15"
+                   CornerRadius="10">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="🛒 Ингредиенты"
+                           TextColor="Black"
+                           FontAttributes="Bold" />
+
+                    <Editor x:Name="IngredientsEditor" 
+                            BackgroundColor="LightGray"
+                            Placeholder="Перечислите ингредиенты и их количество...
+Например:
+• Яйца - 2 шт
+• Мука - 100 г
+• Молоко - 200 мл"
+                            HeightRequest="120" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Шаги приготовления -->
+            <Frame BackgroundColor="White"
+                   Padding="15"
+                   CornerRadius="10">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="👩‍🍳 Шаги приготовления"
+                           
+                           TextColor="Black"
+                           FontAttributes="Bold" />
+
+                    <Editor x:Name="CookingStepsEditor" 
+                            BackgroundColor="LightGray"
+                            Placeholder="Опишите шаги приготовления по порядку...
+Например:
+1. Взбейте яйца с молоком
+2. Добавьте муку и перемешайте
+3. Жарьте на сковороде 5 минут"
+                            HeightRequest="120" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Время приготовления -->
+            <Frame BackgroundColor="White"
+                   Padding="15"
+                   CornerRadius="10">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="⏱️ Время приготовления"
+                           TextColor="Black"
+                           FontAttributes="Bold" />
+
+                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto">
+                        <Label Grid.Row="0" Grid.Column="0" Text="Общее время (минуты):"
+                               TextColor="Black"/>
+                        <Entry x:Name="CookingTimeEntry" 
+                               BackgroundColor="LightGray"
+                               Grid.Row="0" Grid.Column="1" 
+                               Text="30" 
+                               Keyboard="Numeric" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+            <!--<Button Text="📷 Добавить фото"
+        Clicked="OnAddPhotoClicked"
+        BackgroundColor="LightBlue" />
+
+            <Image x:Name="RecipeImage"
+       HeightRequest="0"
+       Aspect="AspectFill" />-->
+            <!-- Кнопки действий -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <Button Grid.Column="0"
+                        Text="💾 Сохранить рецепт"
+                        BackgroundColor="#4CAF50"
+                        TextColor="White"
+                        FontAttributes="Bold"
+                        Clicked="OnSaveRecipeClicked"
+                         Margin="0,0,0,0" />
+
+                <Button Grid.Column="1"
+                        Text="❌ Отмена"
+                        BackgroundColor="#9E9E9E"
+                        TextColor="White"
+                        Clicked="OnCancelClicked" />
+            </Grid>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
