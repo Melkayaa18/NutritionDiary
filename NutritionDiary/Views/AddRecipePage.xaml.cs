@@ -58,6 +58,9 @@ public partial class AddRecipePage : ContentPage
                 await DisplayAlert("Ошибка", "Введите корректное время приготовления", "OK");
                 return;
             }
+            System.Diagnostics.Debug.WriteLine($"=== СОХРАНЕНИЕ РЕЦЕПТА ===");
+            System.Diagnostics.Debug.WriteLine($"ImagePath для сохранения: '{_selectedImagePath}'");
+            System.Diagnostics.Debug.WriteLine($"File.Exists перед сохранением: {File.Exists(_selectedImagePath)}");
 
             // Создаем объект рецепта
             var recipe = new Recipe
@@ -69,9 +72,10 @@ public partial class AddRecipePage : ContentPage
                 ProteinPerServing = protein,
                 FatPerServing = fat,
                 CarbsPerServing = carbs,
+                ImagePath = _selectedImagePath,
                 CookingSteps = FormatCookingSteps(),
                 CookingTime = cookingTime,
-                CreatedByUserId = _userId, 
+                CreatedByUserId = _userId,
                 IsActive = true
             };
 
@@ -127,7 +131,6 @@ public partial class AddRecipePage : ContentPage
     {
         try
         {
-            // Альтернативный способ с FilePicker
             var result = await FilePicker.Default.PickAsync(new PickOptions
             {
                 PickerTitle = "Выберите фото для рецепта",
@@ -136,8 +139,8 @@ public partial class AddRecipePage : ContentPage
 
             if (result != null)
             {
-                // Сохраняем путь к фото
-                _selectedImagePath = result.FullPath;
+                // Копируем файл в постоянное хранилище приложения
+                _selectedImagePath = await CopyFileToAppData(result.FullPath);
 
                 // Отображаем фото
                 RecipeImage.Source = ImageSource.FromFile(_selectedImagePath);
@@ -154,9 +157,78 @@ public partial class AddRecipePage : ContentPage
             System.Diagnostics.Debug.WriteLine($"Ошибка выбора фото: {ex.Message}");
         }
     }
+    // Метод для копирования файла в постоянное хранилище
+    private async Task<string> CopyFileToAppData(string sourcePath)
+    {
+        try
+        {
+            System.Diagnostics.Debug.WriteLine($"=== КОПИРОВАНИЕ ФАЙЛА ===");
+            System.Diagnostics.Debug.WriteLine($"Источник: {sourcePath}");
+            System.Diagnostics.Debug.WriteLine($"Файл существует: {File.Exists(sourcePath)}");
 
+            // Используем специальную папку для данных приложения
+            var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            var recipeImagesFolder = Path.Combine(appDataPath, "NutritionDiary", "RecipeImages");
+
+            System.Diagnostics.Debug.WriteLine($"Целевая папка: {recipeImagesFolder}");
+
+            if (!Directory.Exists(recipeImagesFolder))
+            {
+                Directory.CreateDirectory(recipeImagesFolder);
+                System.Diagnostics.Debug.WriteLine($"? Создана папка: {recipeImagesFolder}");
+            }
+
+            // Генерируем уникальное имя файла
+            var fileName = $"{DateTime.Now:yyyyMMdd_HHmmss}_{Guid.NewGuid():N}{Path.GetExtension(sourcePath)}";
+            var targetPath = Path.Combine(recipeImagesFolder, fileName);
+
+            System.Diagnostics.Debug.WriteLine($"Целевой путь: {targetPath}");
+
+            // Копируем файл с буферизацией
+            using (var sourceStream = new FileStream(sourcePath, FileMode.Open, FileAccess.Read))
+            using (var targetStream = new FileStream(targetPath, FileMode.Create, FileAccess.Write))
+            {
+                await sourceStream.CopyToAsync(targetStream);
+                await targetStream.FlushAsync();
+            }
+
+            // Проверяем, что файл скопировался
+            if (File.Exists(targetPath))
+            {
+                var fileInfo = new FileInfo(targetPath);
+                System.Diagnostics.Debug.WriteLine($"? Файл скопирован успешно");
+                System.Diagnostics.Debug.WriteLine($"Размер: {fileInfo.Length} байт");
+                System.Diagnostics.Debug.WriteLine($"Путь для БД: {targetPath}");
+                return targetPath;
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"? Файл не скопировался!");
+                return sourcePath; // Возвращаем оригинальный путь как fallback
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"? Ошибка копирования фото: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+            return sourcePath; // Возвращаем оригинальный путь в случае ошибки
+        }
+    }
     private void OnRemovePhotoClicked(object sender, EventArgs e)
     {
+        // Удаляем фото из хранилища
+        if (!string.IsNullOrEmpty(_selectedImagePath) && File.Exists(_selectedImagePath))
+        {
+            try
+            {
+                File.Delete(_selectedImagePath);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка удаления фото: {ex.Message}");
+            }
+        }
+
         // Удаляем фото
         _selectedImagePath = null;
         RecipeImage.Source = null;

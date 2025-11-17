@@ -21,7 +21,7 @@ public partial class MyRecipesPage : ContentPage
 
         LoadMyRecipes();
     }
-    private async void LoadMyRecipes()
+    private async Task LoadMyRecipes()
     {
         try
         {
@@ -91,11 +91,11 @@ public partial class MyRecipesPage : ContentPage
         await Navigation.PushAsync(new AddRecipePage(_userId));
     }
 
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
         // Обновляем список при возвращении на страницу
-        LoadMyRecipes();
+        await LoadMyRecipes();
     }
     private async void OnViewRecipeClicked(object sender, EventArgs e)
     {
@@ -115,4 +115,6 @@ public partial class MyRecipesPage : ContentPage
             System.Diagnostics.Debug.WriteLine($"Ошибка открытия рецепта: {ex.Message}");
         }
     }
+
+
 }

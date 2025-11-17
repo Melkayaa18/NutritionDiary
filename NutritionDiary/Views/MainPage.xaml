@@ -132,6 +132,183 @@
                             CornerRadius="10" />
                 </Grid>
 
+
+
+
+                <!-- ===== НОВЫЙ ТРЕКЕР ВОДЫ ===== -->
+                <Frame BackgroundColor="White"
+                       Padding="15"
+                       CornerRadius="15"
+                       HasShadow="True">
+                    <VerticalStackLayout Spacing="15">
+
+                        <!-- Заголовок -->
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0"
+                                   Text="💧 Трекер воды"
+                                   FontSize="18"
+                                   FontAttributes="Bold"
+                                   TextColor="#2196F3" />
+
+                            <Label x:Name="WaterPercentageLabel"
+                                   Grid.Column="1"
+                                   Text="0%"
+                                   FontSize="16"
+                                   FontAttributes="Bold"
+                                   TextColor="#2196F3" />
+                        </Grid>
+
+                        <!-- Круговой прогресс-бар -->
+                        <Grid HorizontalOptions="Center" 
+                              VerticalOptions="Center"
+                              HeightRequest="120"
+                              WidthRequest="120">
+
+                            <!-- Фон круга -->
+                            <Ellipse Stroke="LightGray"
+                                    StrokeThickness="8"
+                                    Fill="Transparent" />
+
+                            <!-- Прогресс -->
+                            <Ellipse x:Name="WaterProgressCircle"
+                                    Stroke="#2196F3"
+                                    StrokeThickness="8"
+                                    Fill="Transparent"
+                                    StrokeDashArray="0,1000"
+                                    Rotation="-90" />
+
+                            <!-- Текст внутри круга -->
+                            <VerticalStackLayout HorizontalOptions="Center" 
+                                               VerticalOptions="Center"
+                                               Spacing="2">
+                                <Label x:Name="WaterAmountLabel"
+                                       Text="0"
+                                       FontSize="20"
+                                       FontAttributes="Bold"
+                                       HorizontalOptions="Center"
+                                       TextColor="#2196F3" />
+                                <Label Text="мл"
+                                       FontSize="12"
+                                       HorizontalOptions="Center"
+                                       TextColor="Gray" />
+                            </VerticalStackLayout>
+                        </Grid>
+
+                        <!-- Цель по воде -->
+                        <Label x:Name="WaterGoalLabel"
+                               Text="Цель: 2000 мл"
+                               FontSize="14"
+                               HorizontalOptions="Center"
+                               TextColor="Gray" />
+
+                        <!-- Кнопки добавления воды -->
+                        <Grid ColumnDefinitions="*,*,*,*" 
+                              ColumnSpacing="10"
+                              RowDefinitions="Auto,Auto">
+
+                            <!-- Стакан 200 мл -->
+                            <Frame Grid.Row="0" Grid.Column="0"
+                                   BackgroundColor="#E3F2FD"
+                                   Padding="10"
+                                   CornerRadius="10"
+                                   HorizontalOptions="Fill">
+                                <VerticalStackLayout Spacing="5" 
+                                                   HorizontalOptions="Center">
+                                    <Label Text="🥛"
+                                           FontSize="20"
+                                           HorizontalOptions="Center" />
+                                    <Button Text="+200 мл"
+                                            BackgroundColor="Transparent"
+                                            TextColor="#2196F3"
+                                            FontSize="10"
+                                            Padding="0"
+                                            Clicked="OnAddWaterClicked"
+                                            CommandParameter="200" />
+                                </VerticalStackLayout>
+                            </Frame>
+
+                            <!-- Стакан 300 мл -->
+                            <Frame Grid.Row="0" Grid.Column="1"
+                                   BackgroundColor="#E3F2FD"
+                                   Padding="10"
+                                   CornerRadius="10"
+                                   HorizontalOptions="Fill">
+                                <VerticalStackLayout Spacing="5" 
+                                                   HorizontalOptions="Center">
+                                    <Label Text="🍶"
+                                           FontSize="20"
+                                           HorizontalOptions="Center" />
+                                    <Button Text="+300 мл"
+                                            BackgroundColor="Transparent"
+                                            TextColor="#2196F3"
+                                            FontSize="10"
+                                            Padding="0"
+                                            Clicked="OnAddWaterClicked"
+                                            CommandParameter="300" />
+                                </VerticalStackLayout>
+                            </Frame>
+
+                            <!-- Бутылка 500 мл -->
+                            <Frame Grid.Row="0" Grid.Column="2"
+                                   BackgroundColor="#E3F2FD"
+                                   Padding="10"
+                                   CornerRadius="10"
+                                   HorizontalOptions="Fill">
+                                <VerticalStackLayout Spacing="5" 
+                                                   HorizontalOptions="Center">
+                                    <Label Text="💧"
+                                           FontSize="20"
+                                           HorizontalOptions="Center" />
+                                    <Button Text="+500 мл"
+                                            BackgroundColor="Transparent"
+                                            TextColor="#2196F3"
+                                            FontSize="10"
+                                            Padding="0"
+                                            Clicked="OnAddWaterClicked"
+                                            CommandParameter="500" />
+                                </VerticalStackLayout>
+                            </Frame>
+
+                            <!-- Другое количество -->
+                            <Frame Grid.Row="0" Grid.Column="3"
+                                   BackgroundColor="#E3F2FD"
+                                   Padding="10"
+                                   CornerRadius="10"
+                                   HorizontalOptions="Fill">
+                                <VerticalStackLayout Spacing="5" 
+                                                   HorizontalOptions="Center">
+                                    <Label Text="⚙️"
+                                           FontSize="20"
+                                           HorizontalOptions="Center" />
+                                    <Button Text="Другое"
+                                            BackgroundColor="Transparent"
+                                            TextColor="#2196F3"
+                                            FontSize="10"
+                                            Padding="0"
+                                            Clicked="OnCustomWaterClicked" />
+                                </VerticalStackLayout>
+                            </Frame>
+
+                            <!-- Кнопка отмены -->
+                            <Button Grid.Row="1" Grid.ColumnSpan="4"
+                                    Text="↶ Отменить последнее"
+                                    BackgroundColor="Transparent"
+                                    TextColor="Gray"
+                                    FontSize="12"
+                                    Clicked="OnUndoWaterClicked"
+                                    Margin="0,10,0,0" />
+                        </Grid>
+
+                        <!-- Мотивационные сообщения -->
+                        <Label x:Name="WaterMessageLabel"
+                               Text="Начните пить воду!"
+                               FontSize="12"
+                               HorizontalOptions="Center"
+                               TextColor="Gray" />
+
+                    </VerticalStackLayout>
+                </Frame>
+
             </VerticalStackLayout>
         </ScrollView>
     </RefreshView>

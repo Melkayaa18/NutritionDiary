@@ -30,6 +30,7 @@ namespace NutritionDiary
             Routing.RegisterRoute("AddRecipePage", typeof(AddRecipePage));
             Routing.RegisterRoute("MyRecipesPage", typeof(MyRecipesPage));
             Routing.RegisterRoute("MyRecipeDetailsPage", typeof(MyRecipeDetailsPage));
+            Routing.RegisterRoute("EditRecipePage", typeof(EditRecipePage));
         }
 
         private void SetStartupPage()

@@ -616,10 +616,10 @@ namespace NutritionDiary.Services
                 string query = @"
         INSERT INTO Recipes 
             (Title, Description, Category, CaloriesPerServing, ProteinPerServing, 
-             FatPerServing, CarbsPerServing, ImagePath, CookingSteps, IsActive, CreatedByUserId)
+             FatPerServing, CarbsPerServing, ImagePath, CookingSteps, IsActive, CreatedByUserId, CookingTime)
         VALUES 
             (@Title, @Description, @Category, @Calories, @Protein, 
-             @Fat, @Carbs, @ImagePath, @CookingSteps, 1, @UserId)";
+             @Fat, @Carbs, @ImagePath, @CookingSteps, 1, @UserId, @CookingTime)";
 
                 using var cmd = new SqlCommand(query, conn);
                 cmd.Parameters.AddWithValue("@Title", recipe.Title);
@@ -632,6 +632,7 @@ namespace NutritionDiary.Services
                 cmd.Parameters.AddWithValue("@ImagePath", recipe.ImagePath ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@CookingSteps", recipe.CookingSteps ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@UserId", recipe.CreatedByUserId);
+                cmd.Parameters.AddWithValue("@CookingTime", recipe.CookingTime); 
 
                 var result = await cmd.ExecuteNonQueryAsync();
                 return result > 0;
@@ -642,6 +643,7 @@ namespace NutritionDiary.Services
                 return false;
             }
         }
+        
 
         // Получение рецептов пользователя
         public async Task<List<Recipe>> GetRecipesByUserId(int userId)
@@ -656,7 +658,7 @@ namespace NutritionDiary.Services
                 string query = @"
         SELECT RecipeId, Title, Description, Category, CaloriesPerServing, 
                ProteinPerServing, FatPerServing, CarbsPerServing, ImagePath,
-               CookingSteps, IsActive, CreatedByUserId
+               CookingSteps, IsActive, CreatedByUserId, CookingTime
         FROM Recipes 
         WHERE CreatedByUserId = @UserId AND IsActive = 1
         ORDER BY Title";
@@ -677,10 +679,11 @@ namespace NutritionDiary.Services
                         ProteinPerServing = reader.IsDBNull(5) ? 0 : reader.GetDecimal(5),
                         FatPerServing = reader.IsDBNull(6) ? 0 : reader.GetDecimal(6),
                         CarbsPerServing = reader.IsDBNull(7) ? 0 : reader.GetDecimal(7),
-                        ImagePath = reader.IsDBNull(8) ? "" : reader.GetString(8), // Загружаем путь к фото
+                        ImagePath = reader.IsDBNull(8) ? "" : reader.GetString(8),
                         CookingSteps = reader.IsDBNull(9) ? "" : reader.GetString(9),
                         IsActive = reader.GetBoolean(10),
-                        CreatedByUserId = reader.IsDBNull(11) ? 0 : reader.GetInt32(11)
+                        CreatedByUserId = reader.IsDBNull(11) ? 0 : reader.GetInt32(11),
+                        CookingTime = reader.IsDBNull(12) ? 0 : reader.GetInt32(12) // Добавьте эту строку
                     });
                 }
             }
@@ -695,7 +698,32 @@ namespace NutritionDiary.Services
 
 
 
+        public async Task<string> GetRecipeImagePath(int recipeId)
+        {
+            try
+            {
+                using var conn = GetConnection();
+                await conn.OpenAsync();
 
+                string query = "SELECT ImagePath FROM Recipes WHERE RecipeId = @RecipeId";
+                using var cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@RecipeId", recipeId);
+
+                var result = await cmd.ExecuteScalarAsync();
+                var imagePath = result?.ToString() ?? "NULL";
+
+                System.Diagnostics.Debug.WriteLine($"=== ПРОВЕРКА БАЗЫ ДАННЫХ ===");
+                System.Diagnostics.Debug.WriteLine($"RecipeId: {recipeId}");
+                System.Diagnostics.Debug.WriteLine($"ImagePath в БД: '{imagePath}'");
+
+                return imagePath;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка проверки ImagePath: {ex.Message}");
+                return $"Ошибка: {ex.Message}";
+            }
+        }
 
 
         public class ChallengesStatistics
@@ -740,7 +768,232 @@ namespace NutritionDiary.Services
                 return new ChallengesStatistics();
             }
         }
+        public async Task<bool> DeleteRecipe(int recipeId)
+        {
+            try
+            {
+                using var conn = GetConnection();
+                await conn.OpenAsync();
 
+                // Сначала получим информацию о рецепте для удаления фото
+                string getQuery = "SELECT ImagePath FROM Recipes WHERE RecipeId = @RecipeId";
+                string imagePath = null;
+
+                using (var getCmd = new SqlCommand(getQuery, conn))
+                {
+                    getCmd.Parameters.AddWithValue("@RecipeId", recipeId);
+                    var result = await getCmd.ExecuteScalarAsync();
+                    if (result != null && result != DBNull.Value)
+                    {
+                        imagePath = result.ToString();
+                    }
+                }
+
+                // Удаляем рецепт из базы данных
+                string deleteQuery = "DELETE FROM Recipes WHERE RecipeId = @RecipeId";
+
+                using var deleteCmd = new SqlCommand(deleteQuery, conn);
+                deleteCmd.Parameters.AddWithValue("@RecipeId", recipeId);
+
+                var rowsAffected = await deleteCmd.ExecuteNonQueryAsync();
+                bool success = rowsAffected > 0;
+
+                // Если рецепт удален и есть фото - удаляем файл фото
+                if (success && !string.IsNullOrEmpty(imagePath) && File.Exists(imagePath))
+                {
+                    try
+                    {
+                        File.Delete(imagePath);
+                        System.Diagnostics.Debug.WriteLine($"Фото удалено: {imagePath}");
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Ошибка удаления фото: {ex.Message}");
+                        // Продолжаем, даже если не удалось удалить фото
+                    }
+                }
+
+                System.Diagnostics.Debug.WriteLine($"Удаление рецепта: RecipeId={recipeId}, success={success}");
+                return success;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка удаления рецепта: {ex.Message}");
+                return false;
+            }
+        }
+
+
+
+
+        public async Task<bool> UpdateRecipe(Recipe recipe)
+        {
+            try
+            {
+                using var conn = GetConnection();
+                await conn.OpenAsync();
+
+                string query = @"
+        UPDATE Recipes 
+        SET 
+            Title = @Title,
+            Description = @Description,
+            Category = @Category,
+            CaloriesPerServing = @Calories,
+            ProteinPerServing = @Protein,
+            FatPerServing = @Fat,
+            CarbsPerServing = @Carbs,
+            ImagePath = @ImagePath,
+            CookingSteps = @CookingSteps,
+            CookingTime = @CookingTime
+        WHERE 
+            RecipeId = @RecipeId";
+
+                using var cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@Title", recipe.Title);
+                cmd.Parameters.AddWithValue("@Description", recipe.Description ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@Category", recipe.Category);
+                cmd.Parameters.AddWithValue("@Calories", recipe.CaloriesPerServing);
+                cmd.Parameters.AddWithValue("@Protein", recipe.ProteinPerServing);
+                cmd.Parameters.AddWithValue("@Fat", recipe.FatPerServing);
+                cmd.Parameters.AddWithValue("@Carbs", recipe.CarbsPerServing);
+                cmd.Parameters.AddWithValue("@ImagePath", recipe.ImagePath ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@CookingSteps", recipe.CookingSteps ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@CookingTime", recipe.CookingTime);
+                cmd.Parameters.AddWithValue("@RecipeId", recipe.RecipeId);
+
+                var result = await cmd.ExecuteNonQueryAsync();
+                return result > 0;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка обновления рецепта: {ex.Message}");
+                return false;
+            }
+        }
+
+
+
+
+        // Добавить запись о выпитой воде
+        public async Task<bool> AddWaterIntake(int userId, decimal amount)
+        {
+            try
+            {
+                using var conn = GetConnection();
+                await conn.OpenAsync();
+
+                string query = @"
+        INSERT INTO WaterIntake (UserId, IntakeDate, Amount)
+        VALUES (@UserId, CAST(GETDATE() AS DATE), @Amount)";
+
+                using var cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@UserId", userId);
+                cmd.Parameters.AddWithValue("@Amount", amount);
+
+                var result = await cmd.ExecuteNonQueryAsync();
+                return result > 0;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка добавления воды: {ex.Message}");
+                return false;
+            }
+        }
+
+        // Получить общее количество воды за сегодня
+        public async Task<decimal> GetTodayWaterIntake(int userId)
+        {
+            try
+            {
+                using var conn = GetConnection();
+                await conn.OpenAsync();
+
+                string query = @"
+        SELECT ISNULL(SUM(Amount), 0) 
+        FROM WaterIntake 
+        WHERE UserId = @UserId AND IntakeDate = CAST(GETDATE() AS DATE)";
+
+                using var cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@UserId", userId);
+
+                var result = await cmd.ExecuteScalarAsync();
+                return Convert.ToDecimal(result);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка получения воды: {ex.Message}");
+                return 0;
+            }
+        }
+
+        // Удалить последнюю запись о воде (для кнопки отмены)
+        public async Task<bool> RemoveLastWaterIntake(int userId)
+        {
+            try
+            {
+                using var conn = GetConnection();
+                await conn.OpenAsync();
+
+                string query = @"
+        DELETE FROM WaterIntake 
+        WHERE WaterId = (
+            SELECT TOP 1 WaterId 
+            FROM WaterIntake 
+            WHERE UserId = @UserId AND IntakeDate = CAST(GETDATE() AS DATE)
+            ORDER BY CreatedAt DESC
+        )";
+
+                using var cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@UserId", userId);
+
+                var result = await cmd.ExecuteNonQueryAsync();
+                return result > 0;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка удаления воды: {ex.Message}");
+                return false;
+            }
+        }
+
+
+
+
+
+
+        public async Task<string> CheckRecipeStructure(int recipeId)
+        {
+            try
+            {
+                using var conn = GetConnection();
+                await conn.OpenAsync();
+
+                string query = @"
+        SELECT 
+            RecipeId, Title, CookingTime, ImagePath, CreatedByUserId
+        FROM Recipes 
+        WHERE RecipeId = @RecipeId";
+
+                using var cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@RecipeId", recipeId);
+
+                using var reader = await cmd.ExecuteReaderAsync();
+                if (await reader.ReadAsync())
+                {
+                    return $"Рецепт #{reader.GetInt32(0)}: {reader.GetString(1)}\n" +
+                           $"CookingTime: {(reader.IsDBNull(2) ? "NULL" : reader.GetInt32(2).ToString())}\n" +
+                           $"ImagePath: {(reader.IsDBNull(3) ? "NULL" : reader.GetString(3))}\n" +
+                           $"CreatedByUserId: {reader.GetInt32(4)}";
+                }
+
+                return "Рецепт не найден";
+            }
+            catch (Exception ex)
+            {
+                return $"Ошибка проверки: {ex.Message}";
+            }
+        }
 
     }
 }

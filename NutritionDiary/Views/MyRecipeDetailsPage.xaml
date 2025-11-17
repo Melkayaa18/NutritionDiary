@@ -8,7 +8,7 @@
         <VerticalStackLayout Spacing="15" Padding="20">
 
             <!-- Фото рецепта -->
-            <Frame BackgroundColor="#F5F5F5"
+            <!--<Frame BackgroundColor="#F5F5F5"
                    Padding="0"
                    CornerRadius="10"
                    HeightRequest="200"
@@ -24,6 +24,26 @@
                                          Color="LightGray" />
                     </Image.Source>
                 </Image>
+            </Frame>-->
+            <Frame BackgroundColor="#F5F5F5"
+       Padding="0"
+       CornerRadius="10"
+       HeightRequest="200"
+       HorizontalOptions="FillAndExpand">
+                <Grid>
+                    <Image x:Name="RecipeImage"
+               Aspect="AspectFill"
+               HorizontalOptions="FillAndExpand"
+               VerticalOptions="FillAndExpand" />
+
+                    <!-- Placeholder, который показывается когда нет фото -->
+                    <Label x:Name="PlaceholderLabel"
+               Text="🍳"
+               FontSize="60"
+               HorizontalOptions="Center"
+               VerticalOptions="Center"
+               IsVisible="False" />
+                </Grid>
             </Frame>
 
             <!-- Основная информация -->
