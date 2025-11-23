@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using ZXing.Net.Maui.Controls;
+using Microsoft.Extensions.Logging;
 
 namespace NutritionDiary
 {
@@ -9,6 +10,7 @@ namespace NutritionDiary
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
+                .UseBarcodeReader()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

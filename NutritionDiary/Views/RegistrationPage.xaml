@@ -2,69 +2,197 @@
 <ContentPage x:Class="NutritionDiary.Views.RegistrationPage"
              xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             Title="Регистрация">
+             Title="Регистрация"
+             BackgroundColor="#FFFBF5">
 
     <ScrollView>
-        <VerticalStackLayout Spacing="15" Padding="20">
+        <VerticalStackLayout Spacing="25" Padding="25">
 
-            <Label Text="Регистрация"
-                   FontSize="24"
-                   FontAttributes="Bold"
-                   HorizontalOptions="Center" />
+            <!-- Заголовок -->
+            <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+                <Label Text="👤"
+                       FontSize="35"
+                       HorizontalOptions="Center" />
+                <Label Text="Создать аккаунт"
+                       FontSize="28"
+                       FontAttributes="Bold"
+                       HorizontalOptions="Center"
+                       TextColor="#5D4037" />
+                <Label Text="Заполните информацию о себе"
+                       FontSize="14"
+                       HorizontalOptions="Center"
+                       TextColor="#8D6E63" />
+            </VerticalStackLayout>
 
-            <Frame BackgroundColor="#F5F5F5"
-                   Padding="15"
-                   CornerRadius="10">
+            <!-- Форма регистрации -->
+            <Frame BackgroundColor="White"
+                   Padding="25"
+                   CornerRadius="20"
+                   HasShadow="True">
 
-                <VerticalStackLayout Spacing="10">
+                <VerticalStackLayout Spacing="15">
 
-                    <Entry x:Name="UsernameEntry" 
-                           BackgroundColor="#B0C4DE"
-                           Placeholder="Логин" />
+                    <!-- Основная информация -->
+                    <VerticalStackLayout Spacing="12">
+                        <Frame BackgroundColor="#F8F8F8"
+                               CornerRadius="12"
+                               Padding="15,0"
+                               HeightRequest="50"
+                               HasShadow="False">
+                            <Entry x:Name="UsernameEntry" 
+                                   Placeholder="Логин *"
+                                   PlaceholderColor="#D8BFD8"
+                                   BackgroundColor="Transparent"
+                                   FontSize="16"
+                                   TextColor="#5D4037"
+                                   HorizontalOptions="Fill"
+                                   VerticalOptions="Center" />
+                        </Frame>
 
-                    <Entry x:Name="PasswordEntry" 
-                           BackgroundColor="#B0C4DE"
-                           Placeholder="Пароль" 
-                           IsPassword="True" />
+                        <Frame BackgroundColor="#F8F8F8"
+                               CornerRadius="12"
+                               Padding="15,0"
+                               HeightRequest="50"
+                               HasShadow="False">
+                            <Entry x:Name="PasswordEntry" 
+                                   Placeholder="Пароль *"
+                                   PlaceholderColor="#D8BFD8"
+                                   BackgroundColor="Transparent"
+                                   FontSize="16"
+                                   TextColor="#5D4037"
+                                   IsPassword="True"
+                                   HorizontalOptions="Fill"
+                                   VerticalOptions="Center" />
+                        </Frame>
 
-                    <Entry x:Name="EmailEntry" 
-                           BackgroundColor="#B0C4DE"
-                           Placeholder="Email (необязательно)" 
-                           Keyboard="Email" />
+                        <Frame BackgroundColor="#F8F8F8"
+                               CornerRadius="12"
+                               Padding="15,0"
+                               HeightRequest="50"
+                               HasShadow="False">
+                            <Entry x:Name="EmailEntry" 
+                                   Placeholder="Email"
+                                   PlaceholderColor="#D8BFD8"
+                                   BackgroundColor="Transparent"
+                                   FontSize="16"
+                                   TextColor="#5D4037"
+                                   Keyboard="Email"
+                                   HorizontalOptions="Fill"
+                                   VerticalOptions="Center" />
+                        </Frame>
+                    </VerticalStackLayout>
 
-                    <Entry x:Name="AgeEntry" 
-                           BackgroundColor="#B0C4DE"
-                           Placeholder="Возраст" 
-                           Keyboard="Numeric" />
+                    <!-- Личная информация -->
+                    <Grid ColumnDefinitions="*,*" 
+                          ColumnSpacing="10"
+                          RowDefinitions="*,*,*"
+                          RowSpacing="10"
+                          Margin="0,10,0,0">
 
-                    <Entry x:Name="HeightEntry" 
-                           BackgroundColor="#B0C4DE"
-                           Placeholder="Рост (см)" 
-                           Keyboard="Numeric" />
+                        <Frame Grid.Row="0" Grid.Column="0"
+                               BackgroundColor="#F8F8F8"
+                               CornerRadius="12"
+                               Padding="15,0"
+                               HeightRequest="50"
+                               HasShadow="False">
+                            <Entry x:Name="AgeEntry" 
+                                   Placeholder="Возраст *"
+                                   PlaceholderColor="#D8BFD8"
+                                   BackgroundColor="Transparent"
+                                   FontSize="14"
+                                   TextColor="#5D4037"
+                                   Keyboard="Numeric"
+                                   HorizontalOptions="Fill"
+                                   VerticalOptions="Center" />
+                        </Frame>
 
-                    <Entry x:Name="CurrentWeightEntry" 
-                           BackgroundColor="#B0C4DE"
-                           Placeholder="Текущий вес (кг)" 
-                           Keyboard="Numeric" />
+                        <Frame Grid.Row="0" Grid.Column="1"
+                               BackgroundColor="#F8F8F8"
+                               CornerRadius="12"
+                               Padding="15,0"
+                               HeightRequest="50"
+                               HasShadow="False">
+                            <Entry x:Name="HeightEntry" 
+                                   Placeholder="Рост (см) *"
+                                   PlaceholderColor="#D8BFD8"
+                                   BackgroundColor="Transparent"
+                                   FontSize="14"
+                                   TextColor="#5D4037"
+                                   Keyboard="Numeric"
+                                   HorizontalOptions="Fill"
+                                   VerticalOptions="Center" />
+                        </Frame>
 
-                    <Entry x:Name="DesiredWeightEntry" 
-                           BackgroundColor="#B0C4DE"
-                           Placeholder="Желаемый вес (кг)" 
-                           Keyboard="Numeric" />
-                    <Button Text="← Назад"
-                            BackgroundColor="Gray"
-                            TextColor="White"
-                            Clicked="OnBackClicked" />
+                        <Frame Grid.Row="1" Grid.Column="0"
+                               BackgroundColor="#F8F8F8"
+                               CornerRadius="12"
+                               Padding="15,0"
+                               HeightRequest="50"
+                               HasShadow="False">
+                            <Entry x:Name="CurrentWeightEntry" 
+                                   Placeholder="Текущий вес (кг) *"
+                                   PlaceholderColor="#D8BFD8"
+                                   BackgroundColor="Transparent"
+                                   FontSize="14"
+                                   TextColor="#5D4037"
+                                   Keyboard="Numeric"
+                                   HorizontalOptions="Fill"
+                                   VerticalOptions="Center" />
+                        </Frame>
 
-                    <Button x:Name="RegisterButton"
-                            Text="Зарегистрироваться"
-                            BackgroundColor="Green"
-                            TextColor="White"
-                            Clicked="OnRegisterClicked" />
+                        <Frame Grid.Row="1" Grid.Column="1"
+                               BackgroundColor="#F8F8F8"
+                               CornerRadius="12"
+                               Padding="15,0"
+                               HeightRequest="50"
+                               HasShadow="False">
+                            <Entry x:Name="DesiredWeightEntry" 
+                                   Placeholder="Цель (кг) *"
+                                   PlaceholderColor="#D8BFD8"
+                                   BackgroundColor="Transparent"
+                                   FontSize="14"
+                                   TextColor="#5D4037"
+                                   Keyboard="Numeric"
+                                   HorizontalOptions="Fill"
+                                   VerticalOptions="Center" />
+                        </Frame>
 
-                    <ActivityIndicator x:Name="LoadingIndicator"
-                                      IsVisible="False"
-                                      IsRunning="False" />
+                        <Label Grid.Row="2" Grid.ColumnSpan="2"
+                               Text="* - обязательные поля"
+                               FontSize="11"
+                               TextColor="#8D6E63"
+                               HorizontalOptions="Center"
+                               Margin="0,5,0,0" />
+                    </Grid>
+
+                    <!-- Кнопки -->
+                    <VerticalStackLayout Spacing="10" Margin="0,15,0,0">
+                        <ActivityIndicator x:Name="LoadingIndicator"
+                                          IsVisible="False"
+                                          IsRunning="False"
+                                          Color="#FF9E6D"
+                                          HorizontalOptions="Center" />
+
+                        <Button x:Name="RegisterButton"
+                                Text="Создать аккаунт"
+                                BackgroundColor="#FF9E6D"
+                                TextColor="White"
+                                CornerRadius="12"
+                                FontSize="16"
+                                FontAttributes="Bold"
+                                HeightRequest="50"
+                                Clicked="OnRegisterClicked" />
+
+                        <Button Text="← Назад"
+                                BackgroundColor="Transparent"
+                                TextColor="#8D6E63"
+                                FontSize="14"
+                                BorderColor="#8D6E63"
+                                BorderWidth="1"
+                                CornerRadius="10"
+                                HeightRequest="45"
+                                Clicked="OnBackClicked" />
+                    </VerticalStackLayout>
 
                 </VerticalStackLayout>
             </Frame>

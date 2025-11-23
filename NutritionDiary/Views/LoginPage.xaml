@@ -2,56 +2,130 @@
 <ContentPage x:Class="NutritionDiary.Views.LoginPage"
              xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             Title="Вход в систему">
+             Title="Вход в систему"
+             BackgroundColor="#FFFBF5">
 
     <ScrollView>
-        <VerticalStackLayout Spacing="20" Padding="30,0" VerticalOptions="Center">
+        <VerticalStackLayout Spacing="30" Padding="30" VerticalOptions="Center">
 
-            <Label Text="Дневник питания"
-                   FontSize="28"
-                   HorizontalOptions="Center"
-                   TextColor="Green" />
+            <!-- Заголовок с иконкой -->
+            <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
+                <Label Text="🍎"
+                       FontSize="40"
+                       HorizontalOptions="Center" />
+                <Label Text="Дневник питания"
+                       FontSize="32"
+                       FontAttributes="Bold"
+                       HorizontalOptions="Center"
+                       TextColor="#5D4037" />
+                <Label Text="Ваш персональный помощник в питании"
+                       FontSize="16"
+                       HorizontalOptions="Center"
+                       TextColor="#8D6E63" />
+            </VerticalStackLayout>
 
-            <Frame BackgroundColor="#F5F5F5"
-                   Padding="20"
-                   CornerRadius="10">
+            <!-- Форма входа -->
+            <Frame BackgroundColor="White"
+                   Padding="25"
+                   CornerRadius="20"
+                   HasShadow="True">
 
-                <VerticalStackLayout Spacing="15">
+                <VerticalStackLayout Spacing="20">
 
-                    <Entry x:Name="UsernameEntry"
-                           Placeholder="Логин"
-                           TextColor="Black"
-                           BackgroundColor="White" />
+                    <!-- Поля ввода -->
+                    <VerticalStackLayout Spacing="15">
+                        <Frame BackgroundColor="#F8F8F8"
+                               CornerRadius="12"
+                               Padding="15,0"
+                               HeightRequest="50"
+                               HasShadow="False">
+                            <Entry x:Name="UsernameEntry"
+                                   Placeholder="Логин"
+                                   PlaceholderColor="#D8BFD8"
+                                   TextColor="#5D4037"
+                                   BackgroundColor="Transparent"
+                                   FontSize="16"
+                                   HorizontalOptions="Fill"
+                                   VerticalOptions="Center" />
+                        </Frame>
 
-                    <Entry x:Name="PasswordEntry"
-                           Placeholder="Пароль"
-                           IsPassword="True"
-                           TextColor="Black"
-                           BackgroundColor="White" />
+                        <Frame BackgroundColor="#F8F8F8"
+                               CornerRadius="12"
+                               Padding="15,0"
+                               HeightRequest="50"
+                               HasShadow="False">
+                            <Entry x:Name="PasswordEntry"
+                                   Placeholder="Пароль"
+                                   PlaceholderColor="#D8BFD8"
+                                   IsPassword="True"
+                                   TextColor="#5D4037"
+                                   BackgroundColor="Transparent"
+                                   FontSize="16"
+                                   HorizontalOptions="Fill"
+                                   VerticalOptions="Center" />
+                        </Frame>
+                    </VerticalStackLayout>
 
-                    <Button x:Name="LoginButton"
-                            Text="Войти"
-                            BackgroundColor="Green"
-                            TextColor="White" />
+                    <!-- Основные кнопки -->
+                    <VerticalStackLayout Spacing="12">
+                        <Button x:Name="LoginButton"
+                                Text="Войти"
+                                BackgroundColor="#FF9E6D"
+                                TextColor="White"
+                                CornerRadius="12"
+                                FontSize="16"
+                                FontAttributes="Bold"
+                                HeightRequest="50" />
 
-                    <ActivityIndicator x:Name="LoadingIndicator"
-                                      IsVisible="False"
-                                      IsRunning="False"
-                                      HorizontalOptions="Center" />
+                        <ActivityIndicator x:Name="LoadingIndicator"
+                                          IsVisible="False"
+                                          IsRunning="False"
+                                          Color="#FF9E6D"
+                                          HorizontalOptions="Center" />
 
-                    <Button x:Name="RegisterButton"
-                            Text="Регистрация"
-                            BackgroundColor="Blue"
-                            TextColor="White" />
-
-                    <Button x:Name="SkipButton"
-                            Text="Пропустить →"
-                            BackgroundColor="Gray"
-                            TextColor="White"
-                            Margin="0,10,0,0" />
+                        <Button x:Name="RegisterButton"
+                                Text="Создать аккаунт"
+                                BackgroundColor="Transparent"
+                                TextColor="#4DB6AC"
+                                FontSize="14"
+                                FontAttributes="Bold"
+                                BorderColor="#4DB6AC"
+                                BorderWidth="2"
+                                CornerRadius="12"
+                                HeightRequest="45" />
+                    </VerticalStackLayout>
 
                 </VerticalStackLayout>
             </Frame>
+
+            <!-- Гостевой вход -->
+            <Frame BackgroundColor="#E3F2FD"
+                   Padding="20"
+                   CornerRadius="15"
+                   HorizontalOptions="Fill">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Хотите просто посмотреть?"
+                           FontSize="14"
+                           FontAttributes="Bold"
+                           TextColor="#0288D1"
+                           HorizontalOptions="Center" />
+                    <Button x:Name="SkipButton"
+                            Text="Попробовать как гость →"
+                            BackgroundColor="Transparent"
+                            TextColor="#0288D1"
+                            FontSize="14"
+                            FontAttributes="Bold"
+                            CornerRadius="10"
+                            HeightRequest="40" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Футер -->
+            <Label Text="Начните свой путь к здоровому питанию сегодня!"
+                   FontSize="12"
+                   HorizontalOptions="Center"
+                   TextColor="#8D6E63"
+                   Margin="0,20,0,0" />
 
         </VerticalStackLayout>
     </ScrollView>

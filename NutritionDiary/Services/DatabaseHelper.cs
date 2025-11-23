@@ -325,7 +325,7 @@ namespace NutritionDiary.Services
 
         // Добавление пользовательского продукта
         public async Task<bool> AddCustomProduct(string name, decimal calories, decimal protein,
-                                               decimal fat, decimal carbs, int userId)
+                                       decimal fat, decimal carbs, int userId, string barcode = null)
         {
             try
             {
@@ -333,12 +333,12 @@ namespace NutritionDiary.Services
                 await conn.OpenAsync();
 
                 string query = @"
-            INSERT INTO Products 
-                (Name, CaloriesPer100g, ProteinPer100g, FatPer100g, CarbsPer100g, 
-                 CategoryId, IsCustom, CreatedByUserId)
-            VALUES 
-                (@Name, @Calories, @Protein, @Fat, @Carbs, 
-                 1, 1, @UserId)";
+        INSERT INTO Products 
+            (Name, CaloriesPer100g, ProteinPer100g, FatPer100g, CarbsPer100g, 
+             CategoryId, IsCustom, CreatedByUserId, Barcode)
+        VALUES 
+            (@Name, @Calories, @Protein, @Fat, @Carbs, 
+             1, 1, @UserId, @Barcode)";
 
                 using var cmd = new SqlCommand(query, conn);
                 cmd.Parameters.AddWithValue("@Name", name);
@@ -347,6 +347,7 @@ namespace NutritionDiary.Services
                 cmd.Parameters.AddWithValue("@Fat", fat);
                 cmd.Parameters.AddWithValue("@Carbs", carbs);
                 cmd.Parameters.AddWithValue("@UserId", userId);
+                cmd.Parameters.AddWithValue("@Barcode", barcode ?? (object)DBNull.Value);
 
                 var result = await cmd.ExecuteNonQueryAsync();
                 return result > 0;
@@ -995,5 +996,58 @@ namespace NutritionDiary.Services
             }
         }
 
+
+
+
+
+
+
+
+
+
+
+
+
+        public async Task<Product> GetProductByBarcode(string barcode)
+        {
+            try
+            {
+                using var conn = GetConnection();
+                await conn.OpenAsync();
+
+                string query = @"
+        SELECT ProductId, Name, CaloriesPer100g, ProteinPer100g, FatPer100g, CarbsPer100g, 
+               CategoryId, IsCustom, CreatedByUserId, Barcode
+        FROM Products 
+        WHERE Barcode = @Barcode";
+
+                using var cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@Barcode", barcode);
+
+                using var reader = await cmd.ExecuteReaderAsync();
+                if (await reader.ReadAsync())
+                {
+                    return new Product
+                    {
+                        ProductId = reader.GetInt32(0),
+                        Name = reader.GetString(1),
+                        CaloriesPer100g = reader.GetDecimal(2),
+                        ProteinPer100g = reader.GetDecimal(3),
+                        FatPer100g = reader.GetDecimal(4),
+                        CarbsPer100g = reader.GetDecimal(5),
+                        CategoryId = reader.GetInt32(6),
+                        IsCustom = reader.GetBoolean(7),
+                        CreatedByUserId = reader.GetInt32(8),
+                        Barcode = reader.IsDBNull(9) ? "" : reader.GetString(9)
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка поиска по штрих-коду: {ex.Message}");
+            }
+
+            return null;
+        }
     }
 }

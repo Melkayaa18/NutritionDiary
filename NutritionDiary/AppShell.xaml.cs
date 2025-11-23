@@ -31,6 +31,7 @@ namespace NutritionDiary
             Routing.RegisterRoute("MyRecipesPage", typeof(MyRecipesPage));
             Routing.RegisterRoute("MyRecipeDetailsPage", typeof(MyRecipeDetailsPage));
             Routing.RegisterRoute("EditRecipePage", typeof(EditRecipePage));
+            Routing.RegisterRoute("BarcodeScannerPage", typeof(BarcodeScannerPage));
         }
 
         private void SetStartupPage()

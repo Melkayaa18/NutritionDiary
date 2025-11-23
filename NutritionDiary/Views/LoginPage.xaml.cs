@@ -4,31 +4,34 @@ namespace NutritionDiary.Views;
 public partial class LoginPage : ContentPage
 {
     private DatabaseHelper _dbHelper;
+
     public LoginPage()
     {
         InitializeComponent();
         _dbHelper = new DatabaseHelper();
+
         LoginButton.Clicked += OnLoginClicked;
         RegisterButton.Clicked += OnRegisterClicked;
         SkipButton.Clicked += OnSkipClicked;
-
     }
+
     private async void OnLoginClicked(object sender, EventArgs e)
     {
-        string username = UsernameEntry.Text;
+        string username = UsernameEntry.Text?.Trim();
         string password = PasswordEntry.Text;
 
         if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
         {
-            await DisplayAlert("Ошибка", "Введите логин и пароль", "OK");
+            await DisplayAlert("Внимание", "Пожалуйста, заполните все поля", "OK");
+            await AnimateShake(UsernameEntry);
+            await AnimateShake(PasswordEntry);
             return;
         }
 
-        LoadingIndicator.IsVisible = true;
-        LoadingIndicator.IsRunning = true;
-        LoginButton.IsEnabled = false;
-        RegisterButton.IsEnabled = false;
-        SkipButton.IsEnabled = false;
+        // Анимация нажатия кнопки
+        await AnimateButtonClick(LoginButton);
+
+        SetLoadingState(true);
 
         try
         {
@@ -39,12 +42,16 @@ public partial class LoginPage : ContentPage
                 Preferences.Set("UserId", userId);
                 Preferences.Set("Username", username);
 
-                // Успешный вход - переходим на AppShell
+                // Анимация успешного входа
+                await AnimateSuccess();
+                await Task.Delay(500);
+
                 Application.Current.MainPage = new AppShell();
             }
             else
             {
                 await DisplayAlert("Ошибка", "Неверный логин или пароль", "OK");
+                await AnimateShake(LoginButton);
             }
         }
         catch (Exception ex)
@@ -53,38 +60,56 @@ public partial class LoginPage : ContentPage
         }
         finally
         {
-            LoadingIndicator.IsVisible = false;
-            LoadingIndicator.IsRunning = false;
-            LoginButton.IsEnabled = true;
-            RegisterButton.IsEnabled = true;
-            SkipButton.IsEnabled = true;
+            SetLoadingState(false);
         }
     }
+
     private async void OnRegisterClicked(object sender, EventArgs e)
     {
-        try
-        {
-            // Используем NavigationPage навигацию
-            await Navigation.PushAsync(new RegistrationPage());
-        }
-        catch (Exception ex)
-        {
-            await DisplayAlert("Ошибка", $"Не удалось открыть регистрацию: {ex.Message}", "OK");
-        }
+        await AnimateButtonClick(RegisterButton);
+        await Navigation.PushAsync(new RegistrationPage());
     }
+
     private async void OnSkipClicked(object sender, EventArgs e)
     {
-        try
-        {
-            Preferences.Set("UserId", 0);
-            Preferences.Set("Username", "Гость");
+        await AnimateButtonClick(SkipButton);
 
-            // Переходим на AppShell через NavigationPage
-            Application.Current.MainPage = new AppShell();
-        }
-        catch (Exception ex)
+        Preferences.Set("UserId", 0);
+        Preferences.Set("Username", "Гость");
+
+        Application.Current.MainPage = new AppShell();
+    }
+
+    private void SetLoadingState(bool isLoading)
+    {
+        LoadingIndicator.IsVisible = isLoading;
+        LoadingIndicator.IsRunning = isLoading;
+        LoginButton.IsEnabled = !isLoading;
+        RegisterButton.IsEnabled = !isLoading;
+        SkipButton.IsEnabled = !isLoading;
+    }
+
+    private async Task AnimateButtonClick(Button button)
+    {
+        if (button != null)
         {
-            await DisplayAlert("Ошибка", $"Не удалось перейти: {ex.Message}", "OK");
+            await button.ScaleTo(0.95, 50, Easing.SpringIn);
+            await button.ScaleTo(1, 100, Easing.SpringOut);
         }
+    }
+
+    private async Task AnimateShake(View view)
+    {
+        await view.TranslateTo(-10, 0, 50);
+        await view.TranslateTo(10, 0, 50);
+        await view.TranslateTo(-5, 0, 50);
+        await view.TranslateTo(5, 0, 50);
+        await view.TranslateTo(0, 0, 50);
+    }
+
+    private async Task AnimateSuccess()
+    {
+        await LoginButton.ScaleTo(1.1, 200);
+        await LoginButton.ScaleTo(1, 200);
     }
 }

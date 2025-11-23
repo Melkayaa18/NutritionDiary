@@ -14,6 +14,7 @@ public partial class DiaryEntryPage : ContentPage
     private List<Product> _allProducts;
     private ObservableCollection<Product> _filteredProducts;
     private Product _selectedProduct;
+    private BarcodeScannerPage _barcodeScannerPage;
     public DiaryEntryPage(int mealTypeId, string mealTypeName)
 	{
         try
@@ -404,6 +405,271 @@ public partial class DiaryEntryPage : ContentPage
 
         System.Diagnostics.Debug.WriteLine("DiaryEntryPage закрыт");
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    private async void OnScanBarcodeClicked(object sender, EventArgs e)
+    {
+        //try
+        //{
+        //    // Проверяем разрешения камеры
+        //    var status = await Permissions.CheckStatusAsync<Permissions.Camera>();
+        //    if (status != PermissionStatus.Granted)
+        //    {
+        //        status = await Permissions.RequestAsync<Permissions.Camera>();
+        //        if (status != PermissionStatus.Granted)
+        //        {
+        //            await DisplayAlert("Ошибка", "Для сканирования штрих-кодов необходимо разрешение на использование камеры", "OK");
+        //            return;
+        //        }
+        //    }
+
+        //    // Используем упрощенную версию сканера
+        //    var scannerPage = new BarcodeScannerPage();
+        //    scannerPage.OnBarcodeScanned += OnBarcodeScanned;
+
+        //    await Navigation.PushAsync(scannerPage);
+        //}
+        //catch (Exception ex)
+        //{
+        //    await DisplayAlert("Ошибка", $"Не удалось запустить сканирование: {ex.Message}", "OK");
+        //}
+    }
+
+    private async void OnBarcodeScanned(string barcode)
+    {
+        try
+        {
+            System.Diagnostics.Debug.WriteLine($"Отсканирован штрих-код: {barcode}");
+
+            // Показываем индикатор загрузки
+            await DisplayAlert("Сканирование", "Ищем продукт по штрих-коду...", "OK");
+
+            // Ищем продукт в базе данных по штрих-коду
+            var product = await FindProductByBarcode(barcode);
+
+            if (product != null)
+            {
+                // Продукт найден - выбираем его
+                await SelectScannedProduct(product);
+            }
+            else
+            {
+                // Продукт не найден - ищем в открытой базе данных
+                await SearchProductInOpenDatabase(barcode);
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Ошибка", $"Ошибка обработки штрих-кода: {ex.Message}", "OK");
+            System.Diagnostics.Debug.WriteLine($"Ошибка обработки штрих-кода: {ex.Message}");
+        }
+    }
+
+    private async Task<Product> FindProductByBarcode(string barcode)
+    {
+        // Ищем продукт в нашей базе данных по штрих-коду
+        // Для этого нужно добавить поле Barcode в таблицу Products
+
+        // Временная реализация - ищем по имени, содержащему штрих-код
+        var allProducts = await _dbHelper.GetProducts();
+        return allProducts.FirstOrDefault(p =>
+            p.Name.Contains(barcode) ||
+            (p.Name.ToLower().Contains("штрих") && p.Name.Contains(barcode.Substring(0, Math.Min(5, barcode.Length))))
+        );
+    }
+
+    private async Task SearchProductInOpenDatabase(string barcode)
+    {
+        try
+        {
+            // Используем Open Food Facts API для поиска продукта
+            var productInfo = await GetProductFromOpenFoodFacts(barcode);
+
+            if (productInfo != null)
+            {
+                // Предлагаем пользователю добавить продукт
+                bool addProduct = await DisplayAlert("Продукт найден",
+                    $"Название: {productInfo.Name}\nКалории: {productInfo.CaloriesPer100g} ккал/100г\n\nДобавить этот продукт?",
+                    "Да", "Нет");
+
+                if (addProduct)
+                {
+                    // Добавляем продукт в базу данных
+                    bool success = await _dbHelper.AddCustomProduct(
+                        productInfo.Name,
+                        productInfo.CaloriesPer100g,
+                        productInfo.ProteinPer100g,
+                        productInfo.FatPer100g,
+                        productInfo.CarbsPer100g,
+                        _userId
+                    );
+
+                    if (success)
+                    {
+                        // Обновляем список продуктов и выбираем новый продукт
+                        await LoadProducts();
+                        var newProduct = _allProducts.FirstOrDefault(p => p.Name == productInfo.Name);
+                        if (newProduct != null)
+                        {
+                            await SelectScannedProduct(newProduct);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                await DisplayAlert("Не найдено", "Продукт с таким штрих-кодом не найден в базе данных", "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Ошибка", $"Не удалось найти продукт: {ex.Message}", "OK");
+        }
+    }
+
+    private async Task SelectScannedProduct(Product product)
+    {
+        try
+        {
+            // Снимаем выделение с предыдущего продукта
+            if (_selectedProduct != null)
+            {
+                _selectedProduct.IsSelected = false;
+            }
+
+            // Устанавливаем выделение на найденный продукт
+            _selectedProduct = product;
+            _selectedProduct.IsSelected = true;
+
+            // Обновляем отображение
+            UpdateSelectedProductDisplay();
+
+            // Устанавливаем стандартное количество (100г)
+            QuantityEntry.Text = "100";
+
+            // Пересчитываем питательную ценность
+            CalculateNutrition();
+
+            await DisplayAlert("Успех", $"Продукт '{product.Name}' выбран!", "OK");
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Ошибка", $"Не удалось выбрать продукт: {ex.Message}", "OK");
+        }
+    }
+
+    // Метод для получения информации о продукте из Open Food Facts
+    private async Task<Product> GetProductFromOpenFoodFacts(string barcode)
+    {
+        try
+        {
+            using var client = new HttpClient();
+            client.Timeout = TimeSpan.FromSeconds(10);
+
+            var url = $"https://world.openfoodfacts.org/api/v0/product/{barcode}.json";
+            var response = await client.GetAsync(url);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var productData = System.Text.Json.JsonDocument.Parse(json);
+
+                var status = productData.RootElement.GetProperty("status").GetInt32();
+                if (status == 1)
+                {
+                    var product = productData.RootElement.GetProperty("product");
+
+                    var productName = product.GetProperty("product_name").GetString() ?? "Неизвестный продукт";
+                    var brands = product.GetProperty("brands").GetString() ?? "";
+
+                    // Формируем полное название
+                    var fullName = string.IsNullOrEmpty(brands) ? productName : $"{brands} - {productName}";
+
+                    // Получаем питательную ценность
+                    decimal calories = 0;
+                    decimal protein = 0;
+                    decimal fat = 0;
+                    decimal carbs = 0;
+
+                    if (product.TryGetProperty("nutriments", out var nutriments))
+                    {
+                        // Калории (может быть в ккал или кДж)
+                        if (nutriments.TryGetProperty("energy-kcal_100g", out var kcalElement) &&
+                            kcalElement.ValueKind != System.Text.Json.JsonValueKind.Null)
+                        {
+                            calories = kcalElement.GetDecimal();
+                        }
+                        else if (nutriments.TryGetProperty("energy_100g", out var energyElement) &&
+                                 energyElement.ValueKind != System.Text.Json.JsonValueKind.Null)
+                        {
+                            // Конвертируем кДж в ккал (1 ккал = 4.184 кДж)
+                            var energyKj = energyElement.GetDecimal();
+                            calories = energyKj / 4.184m;
+                        }
+
+                        // Белки
+                        if (nutriments.TryGetProperty("proteins_100g", out var proteinElement) &&
+                            proteinElement.ValueKind != System.Text.Json.JsonValueKind.Null)
+                        {
+                            protein = proteinElement.GetDecimal();
+                        }
+
+                        // Жиры
+                        if (nutriments.TryGetProperty("fat_100g", out var fatElement) &&
+                            fatElement.ValueKind != System.Text.Json.JsonValueKind.Null)
+                        {
+                            fat = fatElement.GetDecimal();
+                        }
+
+                        // Углеводы
+                        if (nutriments.TryGetProperty("carbohydrates_100g", out var carbsElement) &&
+                            carbsElement.ValueKind != System.Text.Json.JsonValueKind.Null)
+                        {
+                            carbs = carbsElement.GetDecimal();
+                        }
+                    }
+
+                    return new Product
+                    {
+                        Name = fullName,
+                        CaloriesPer100g = calories,
+                        ProteinPer100g = protein,
+                        FatPer100g = fat,
+                        CarbsPer100g = carbs,
+                        CategoryId = 1,
+                        IsCustom = true,
+                        CreatedByUserId = _userId
+                    };
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Ошибка получения данных от Open Food Facts: {ex.Message}");
+        }
+
+        return null;
+    }
+
+
+
+
 
     // Метод для обработки параметров от Shell
     //protected override void OnAppearing()

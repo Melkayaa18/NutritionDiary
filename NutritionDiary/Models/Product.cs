@@ -20,6 +20,10 @@ namespace NutritionDiary.Models
         public bool IsCustom { get; set; }
         public int CreatedByUserId { get; set; }
 
+
+
+        public string Barcode { get; set; } = string.Empty;
+
         // Вычисляемое свойство для отображения
         public string DisplayName => $"{Name} ({CaloriesPer100g} ккал/100г)";
 

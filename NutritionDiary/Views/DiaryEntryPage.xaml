@@ -133,6 +133,16 @@
                     Margin="0,10,0,0"
                     Clicked="OnAddCustomProductClicked" />
 
+
+            <!--<Button x:Name="ScanBarcodeButton"
+        Text="📷 Сканировать штрих-код"
+        BackgroundColor="#FF9800"
+        TextColor="White"
+        Margin="0,10,0,0"
+        Clicked="OnScanBarcodeClicked" />-->
+
+
+
             <!-- Кнопки действий -->
             <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                 <Button Grid.Column="0"
