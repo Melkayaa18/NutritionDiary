@@ -2,27 +2,194 @@
 <ContentPage x:Class="NutritionDiary.Views.RecipeDetailsPage"
              xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             Title="Рецепт">
+             Title="Рецепт"
+             BackgroundColor="#FFFBF5">
 
     <ScrollView>
-        <VerticalStackLayout Spacing="15" Padding="20">
+        <VerticalStackLayout Spacing="25" Padding="25">
 
-            <Label x:Name="TitleLabel"
-                   FontSize="20"
-                   FontAttributes="Bold"
-                   HorizontalOptions="Center" />
+            <!-- Заголовок -->
+            <Frame BackgroundColor="#FF9E6D"
+                   Padding="20"
+                   CornerRadius="15"
+                   HorizontalOptions="Fill">
+                <Label x:Name="TitleLabel"
+                       FontSize="20"
+                       FontAttributes="Bold"
+                       TextColor="White"
+                       HorizontalOptions="Center"
+                       LineBreakMode="WordWrap" />
+            </Frame>
 
-            <Label x:Name="NutritionLabel" />
+            <!-- Пищевая ценность -->
+            <Frame BackgroundColor="White"
+                   Padding="25"
+                   CornerRadius="20"
+                   HasShadow="True">
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="📊 Пищевая ценность на порцию"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="#5D4037" />
 
-            <Label x:Name="DescriptionLabel" />
+                    <Grid ColumnDefinitions="*,*,*,*" 
+                          ColumnSpacing="10"
+                          RowDefinitions="Auto,Auto">
 
-            <Label x:Name="IngredientsLabel" />
+                        <!-- Калории -->
+                        <Frame Grid.Row="0" Grid.Column="0"
+                               BackgroundColor="#FFF3E0"
+                               Padding="15"
+                               CornerRadius="12"
+                               HasShadow="False">
+                            <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+                                <Label Text="🔥"
+                                       FontSize="16"
+                                       HorizontalOptions="Center" />
+                                <Label x:Name="CaloriesLabel"
+                                       Text="0"
+                                       FontSize="14"
+                                       FontAttributes="Bold"
+                                       TextColor="#E65100"
+                                       HorizontalOptions="Center" />
+                                <Label Text="ккал"
+                                       FontSize="10"
+                                       TextColor="#E65100"
+                                       HorizontalOptions="Center" />
+                            </VerticalStackLayout>
+                        </Frame>
 
-            <Label x:Name="CookingLabel" />
+                        <!-- Белки -->
+                        <Frame Grid.Row="0" Grid.Column="1"
+                               BackgroundColor="#E8F5E8"
+                               Padding="15"
+                               CornerRadius="12"
+                               HasShadow="False">
+                            <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+                                <Label Text="🥩"
+                                       FontSize="16"
+                                       HorizontalOptions="Center" />
+                                <Label x:Name="ProteinLabel"
+                                       Text="0"
+                                       FontSize="14"
+                                       FontAttributes="Bold"
+                                       TextColor="#388E3C"
+                                       HorizontalOptions="Center" />
+                                <Label Text="белки"
+                                       FontSize="10"
+                                       TextColor="#388E3C"
+                                       HorizontalOptions="Center" />
+                            </VerticalStackLayout>
+                        </Frame>
 
-            <Button Text="Закрыть"
-                    BackgroundColor="Gray"
+                        <!-- Жиры -->
+                        <Frame Grid.Row="0" Grid.Column="2"
+                               BackgroundColor="#FFF3E0"
+                               Padding="15"
+                               CornerRadius="12"
+                               HasShadow="False">
+                            <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+                                <Label Text="🥑"
+                                       FontSize="16"
+                                       HorizontalOptions="Center" />
+                                <Label x:Name="FatLabel"
+                                       Text="0"
+                                       FontSize="14"
+                                       FontAttributes="Bold"
+                                       TextColor="#F57C00"
+                                       HorizontalOptions="Center" />
+                                <Label Text="жиры"
+                                       FontSize="10"
+                                       TextColor="#F57C00"
+                                       HorizontalOptions="Center" />
+                            </VerticalStackLayout>
+                        </Frame>
+
+                        <!-- Углеводы -->
+                        <Frame Grid.Row="0" Grid.Column="3"
+                               BackgroundColor="#E3F2FD"
+                               Padding="15"
+                               CornerRadius="12"
+                               HasShadow="False">
+                            <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+                                <Label Text="🍚"
+                                       FontSize="16"
+                                       HorizontalOptions="Center" />
+                                <Label x:Name="CarbsLabel"
+                                       Text="0"
+                                       FontSize="14"
+                                       FontAttributes="Bold"
+                                       TextColor="#1976D2"
+                                       HorizontalOptions="Center" />
+                                <Label Text="углеводы"
+                                       FontSize="10"
+                                       TextColor="#1976D2"
+                                       HorizontalOptions="Center" />
+                            </VerticalStackLayout>
+                        </Frame>
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Описание -->
+            <Frame BackgroundColor="White"
+                   Padding="25"
+                   CornerRadius="20"
+                   HasShadow="True">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="📝 Описание"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="#5D4037" />
+                    <Label x:Name="DescriptionLabel"
+                           FontSize="14"
+                           TextColor="#8D6E63"
+                           LineBreakMode="WordWrap" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Ингредиенты -->
+            <Frame BackgroundColor="White"
+                   Padding="25"
+                   CornerRadius="20"
+                   HasShadow="True">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="🛒 Ингредиенты"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="#5D4037" />
+                    <Label x:Name="IngredientsLabel"
+                           FontSize="14"
+                           TextColor="#8D6E63"
+                           LineBreakMode="WordWrap" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Приготовление -->
+            <Frame BackgroundColor="White"
+                   Padding="25"
+                   CornerRadius="20"
+                   HasShadow="True">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="👩‍🍳 Приготовление"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="#5D4037" />
+                    <Label x:Name="CookingLabel"
+                           FontSize="14"
+                           TextColor="#8D6E63"
+                           LineBreakMode="WordWrap" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Кнопка закрытия -->
+            <Button Text="❌ Закрыть"
+                    BackgroundColor="#8D6E63"
                     TextColor="White"
+                    CornerRadius="12"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    HeightRequest="55"
                     Clicked="OnCloseClicked" />
 
         </VerticalStackLayout>

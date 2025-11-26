@@ -1001,7 +1001,102 @@ namespace NutritionDiary.Services
 
 
 
+        // Получение рецепта по ID
+        public async Task<Recipe> GetRecipeById(int recipeId)
+        {
+            try
+            {
+                using var conn = GetConnection();
+                await conn.OpenAsync();
 
+                string query = @"
+            SELECT RecipeId, Title, Description, Category, CaloriesPerServing, 
+                   ProteinPerServing, FatPerServing, CarbsPerServing, ImagePath,
+                   CookingSteps, IsActive, CreatedByUserId, CookingTime
+            FROM Recipes 
+            WHERE RecipeId = @RecipeId";
+
+                using var cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@RecipeId", recipeId);
+
+                using var reader = await cmd.ExecuteReaderAsync();
+                if (await reader.ReadAsync())
+                {
+                    return new Recipe
+                    {
+                        RecipeId = reader.GetInt32(0),
+                        Title = reader.GetString(1),
+                        Description = reader.IsDBNull(2) ? "" : reader.GetString(2),
+                        Category = reader.IsDBNull(3) ? "" : reader.GetString(3),
+                        CaloriesPerServing = reader.IsDBNull(4) ? 0 : reader.GetDecimal(4),
+                        ProteinPerServing = reader.IsDBNull(5) ? 0 : reader.GetDecimal(5),
+                        FatPerServing = reader.IsDBNull(6) ? 0 : reader.GetDecimal(6),
+                        CarbsPerServing = reader.IsDBNull(7) ? 0 : reader.GetDecimal(7),
+                        ImagePath = reader.IsDBNull(8) ? "" : reader.GetString(8),
+                        CookingSteps = reader.IsDBNull(9) ? "" : reader.GetString(9),
+                        IsActive = reader.GetBoolean(10),
+                        CreatedByUserId = reader.IsDBNull(11) ? 0 : reader.GetInt32(11),
+                        CookingTime = reader.IsDBNull(12) ? 0 : reader.GetInt32(12)
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка получения рецепта по ID: {ex.Message}");
+            }
+
+            return null;
+        }
+
+        // Получение рецептов по категории
+        public async Task<List<Recipe>> GetRecipesByCategory(string category)
+        {
+            var recipes = new List<Recipe>();
+
+            try
+            {
+                using var conn = GetConnection();
+                await conn.OpenAsync();
+
+                string query = @"
+            SELECT RecipeId, Title, Description, Category, CaloriesPerServing, 
+                   ProteinPerServing, FatPerServing, CarbsPerServing, ImagePath,
+                   CookingSteps, IsActive, CreatedByUserId, CookingTime
+            FROM Recipes 
+            WHERE Category = @Category AND IsActive = 1
+            ORDER BY Title";
+
+                using var cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@Category", category);
+
+                using var reader = await cmd.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    recipes.Add(new Recipe
+                    {
+                        RecipeId = reader.GetInt32(0),
+                        Title = reader.GetString(1),
+                        Description = reader.IsDBNull(2) ? "" : reader.GetString(2),
+                        Category = reader.IsDBNull(3) ? "" : reader.GetString(3),
+                        CaloriesPerServing = reader.IsDBNull(4) ? 0 : reader.GetDecimal(4),
+                        ProteinPerServing = reader.IsDBNull(5) ? 0 : reader.GetDecimal(5),
+                        FatPerServing = reader.IsDBNull(6) ? 0 : reader.GetDecimal(6),
+                        CarbsPerServing = reader.IsDBNull(7) ? 0 : reader.GetDecimal(7),
+                        ImagePath = reader.IsDBNull(8) ? "" : reader.GetString(8),
+                        CookingSteps = reader.IsDBNull(9) ? "" : reader.GetString(9),
+                        IsActive = reader.GetBoolean(10),
+                        CreatedByUserId = reader.IsDBNull(11) ? 0 : reader.GetInt32(11),
+                        CookingTime = reader.IsDBNull(12) ? 0 : reader.GetInt32(12)
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка получения рецептов по категории: {ex.Message}");
+            }
+
+            return recipes;
+        }
 
 
 

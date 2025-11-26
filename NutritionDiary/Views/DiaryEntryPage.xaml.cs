@@ -14,9 +14,8 @@ public partial class DiaryEntryPage : ContentPage
     private List<Product> _allProducts;
     private ObservableCollection<Product> _filteredProducts;
     private Product _selectedProduct;
-    private BarcodeScannerPage _barcodeScannerPage;
     public DiaryEntryPage(int mealTypeId, string mealTypeName)
-	{
+    {
         try
         {
             InitializeComponent();
@@ -48,7 +47,6 @@ public partial class DiaryEntryPage : ContentPage
         {
             System.Diagnostics.Debug.WriteLine("DiaryEntryPage.OnAppearing вызван");
 
-            // Проверяем, что _dbHelper не null
             if (_dbHelper == null)
             {
                 System.Diagnostics.Debug.WriteLine("_dbHelper is NULL в OnAppearing! Создаем заново.");
@@ -84,6 +82,7 @@ public partial class DiaryEntryPage : ContentPage
             await LoadProducts();
 
             // Настраиваем обработчики событий
+            ProductSearchBar.TextChanged += OnSearchTextChanged;
             QuantityEntry.TextChanged += OnQuantityChanged;
 
             // Первоначальный расчет
@@ -148,6 +147,7 @@ public partial class DiaryEntryPage : ContentPage
                 _selectedProduct.IsSelected = false;
                 _selectedProduct = null;
                 SelectedProductFrame.IsVisible = false;
+                ResetNutritionLabels();
             }
 
             if (string.IsNullOrWhiteSpace(searchText))
@@ -164,7 +164,7 @@ public partial class DiaryEntryPage : ContentPage
                 // Фильтруем продукты по введенному тексту
                 var filtered = _allProducts.Where(p =>
                     p.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-                    p.DisplayName.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+                    (p.DisplayName != null && p.DisplayName.Contains(searchText, StringComparison.OrdinalIgnoreCase))
                 ).ToList();
 
                 _filteredProducts.Clear();
@@ -181,6 +181,7 @@ public partial class DiaryEntryPage : ContentPage
             System.Diagnostics.Debug.WriteLine($"Ошибка поиска: {ex.Message}");
         }
     }
+
 
 
     private void OnProductSelectedFromList(object sender, SelectedItemChangedEventArgs e)
@@ -204,11 +205,15 @@ public partial class DiaryEntryPage : ContentPage
                 UpdateSelectedProductDisplay();
 
                 CalculateNutrition();
+
+                // Прокручиваем к выбранному продукту
+                ProductsListView.ScrollTo(_selectedProduct, ScrollToPosition.MakeVisible, true);
             }
             else
             {
                 // Если продукт не выбран, скрываем блок
                 SelectedProductFrame.IsVisible = false;
+                ResetNutritionLabels();
             }
         }
         catch (Exception ex)
@@ -234,10 +239,13 @@ public partial class DiaryEntryPage : ContentPage
     {
         try
         {
+            // Анимация кнопки
+            await AnimateButtonClick(sender as Button);
+
             // Проверяем авторизацию
             if (_userId == 0)
             {
-                await DisplayAlert("Вход required", "Для создания своих продуктов необходимо войти в систему", "OK");
+                await DisplayAlert("Требуется вход", "Для создания своих продуктов необходимо войти в систему", "OK");
                 return;
             }
 
@@ -247,6 +255,18 @@ public partial class DiaryEntryPage : ContentPage
         catch (Exception ex)
         {
             await DisplayAlert("Ошибка", $"Не удалось открыть страницу создания продукта: {ex.Message}", "OK");
+        }
+    }
+
+    private async void OnEditProductClicked(object sender, EventArgs e)
+    {
+        if (_selectedProduct != null && _selectedProduct.IsCustom && _selectedProduct.CreatedByUserId == _userId)
+        {
+            await DisplayAlert("Редактирование", "Функция редактирования продукта будет добавлена в будущем обновлении", "OK");
+        }
+        else
+        {
+            await DisplayAlert("Информация", "Вы можете редактировать только свои собственные продукты", "OK");
         }
     }
 
@@ -299,7 +319,6 @@ public partial class DiaryEntryPage : ContentPage
     // Новый метод для обновления Label'ов
     private void UpdateNutritionLabels(decimal calories, decimal protein, decimal fat, decimal carbs)
     {
-        // Убеждаемся, что обновление происходит в UI потоке
         if (MainThread.IsMainThread)
         {
             CaloriesLabel.Text = $"{calories:F1}";
@@ -317,8 +336,6 @@ public partial class DiaryEntryPage : ContentPage
                 CarbsLabel.Text = $"{carbs:F1} г";
             });
         }
-
-        System.Diagnostics.Debug.WriteLine($"UI обновлен: Калории={CaloriesLabel.Text}, Белки={ProteinLabel.Text}, Жиры={FatLabel.Text}, Углеводы={CarbsLabel.Text}");
     }
 
 
@@ -335,6 +352,9 @@ public partial class DiaryEntryPage : ContentPage
     {
         try
         {
+            // Анимация кнопки
+            await AnimateButtonClick(sender as Button);
+
             System.Diagnostics.Debug.WriteLine("=== НАЧАЛО OnSaveClicked ===");
 
             if (_userId == 0)
@@ -372,7 +392,12 @@ public partial class DiaryEntryPage : ContentPage
             if (success)
             {
                 System.Diagnostics.Debug.WriteLine("✅ Запись успешно сохранена!");
-                await DisplayAlert("Успех", "Запись добавлена в дневник!", "OK");
+
+                // Анимация успеха
+                await AnimateSuccess();
+                await Task.Delay(300);
+
+                await DisplayAlert("Успех", "Запись добавлена в дневник! 🎉", "OK");
                 await Navigation.PopAsync();
             }
             else
@@ -387,9 +412,10 @@ public partial class DiaryEntryPage : ContentPage
             await DisplayAlert("Ошибка", $"Не удалось сохранить запись: {ex.Message}", "OK");
         }
     }
-   
+
     private async void OnCancelClicked(object sender, EventArgs e)
     {
+        await AnimateButtonClick(sender as Button);
         await Navigation.PopAsync();
     }
 
@@ -397,11 +423,12 @@ public partial class DiaryEntryPage : ContentPage
     {
         base.OnDisappearing();
 
-        // Отписываемся от событий (теперь только QuantityEntry, т.к. ProductPicker удален)
+        // Отписываемся от событий
+        if (ProductSearchBar != null)
+            ProductSearchBar.TextChanged -= OnSearchTextChanged;
+
         if (QuantityEntry != null)
-        {
             QuantityEntry.TextChanged -= OnQuantityChanged;
-        }
 
         System.Diagnostics.Debug.WriteLine("DiaryEntryPage закрыт");
     }
@@ -668,7 +695,22 @@ public partial class DiaryEntryPage : ContentPage
     }
 
 
+    // Анимации
+    private async Task AnimateButtonClick(Button button)
+    {
+        if (button != null)
+        {
+            await button.ScaleTo(0.95, 50, Easing.SpringIn);
+            await button.ScaleTo(1, 100, Easing.SpringOut);
+        }
+    }
 
+    private async Task AnimateSuccess()
+    {
+        // Анимация успешного сохранения
+        await SelectedProductFrame.ScaleTo(1.1, 150);
+        await SelectedProductFrame.ScaleTo(1, 150);
+    }
 
 
     // Метод для обработки параметров от Shell

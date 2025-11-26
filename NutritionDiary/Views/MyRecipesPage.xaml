@@ -2,150 +2,256 @@
 <ContentPage x:Class="NutritionDiary.Views.MyRecipesPage"
              xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             Title="Мои рецепты">
+             Title="Мои рецепты"
+             BackgroundColor="#FFFBF5">
 
-    <ScrollView>
-        <VerticalStackLayout Spacing="15" Padding="20">
+    <RefreshView x:Name="RefreshView" RefreshColor="#FF9E6D">
+        <ScrollView>
+            <VerticalStackLayout Spacing="25" Padding="25">
 
-            <Label Text="📚 Мои рецепты"
-                   FontSize="20"
-                   FontAttributes="Bold"
-                   HorizontalOptions="Center" />
-
-            <!-- Статистика -->
-            <Frame BackgroundColor="#E3F2FD"
-                   Padding="15"
-                   CornerRadius="10">
-                <HorizontalStackLayout Spacing="15">
-                    <Label x:Name="RecipesCountLabel"
-                           TextColor="Black"
-                           Text="Загрузка..."
+                <!-- Заголовок -->
+                <Frame BackgroundColor="#FF9E6D"
+                       Padding="20"
+                       CornerRadius="15"
+                       HorizontalOptions="Fill">
+                    <Label Text="📚 Мои рецепты"
+                           FontSize="20"
                            FontAttributes="Bold"
-                           VerticalOptions="Center" />
+                           TextColor="White"
+                           HorizontalOptions="Center" />
+                </Frame>
 
-                    <Button Text="➕ Новый рецепт"
-                            BackgroundColor="#4CAF50"
-                            TextColor="White"
-                            FontSize="12"
-                            Clicked="OnAddNewRecipeClicked" />
-                </HorizontalStackLayout>
-            </Frame>
+                <!-- Статистика и действия -->
+                <Frame BackgroundColor="#E3F2FD"
+                       Padding="20"
+                       CornerRadius="15"
+                       HasShadow="True">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="15">
+                        <VerticalStackLayout Grid.Column="0" Spacing="5">
+                            <Label x:Name="RecipesCountLabel"
+                                   Text="Загрузка..."
+                                   FontSize="16"
+                                   FontAttributes="Bold"
+                                   TextColor="#0288D1" />
+                            <Label Text="Ваши созданные рецепты"
+                                   FontSize="12"
+                                   TextColor="#81D4FA" />
+                        </VerticalStackLayout>
 
-            <!-- Поиск по моим рецептам -->
-            <SearchBar x:Name="SearchBar"
-                      Placeholder="Поиск по моим рецептам..."
-                      TextChanged="OnSearchTextChanged" />
+                        <Button Grid.Column="1"
+                                Text="➕ Новый"
+                                BackgroundColor="#4DB6AC"
+                                TextColor="White"
+                                CornerRadius="10"
+                                FontSize="14"
+                                FontAttributes="Bold"
+                                HeightRequest="40"
+                                WidthRequest="100"
+                                Clicked="OnAddNewRecipeClicked" />
+                    </Grid>
+                </Frame>
 
-            <!-- Список рецептов -->
-            <CollectionView x:Name="RecipesCollectionView">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Frame BackgroundColor="White"
-                               Padding="15"
-                               CornerRadius="10"
-                               HasShadow="True">
-                            <VerticalStackLayout Spacing="10">
+                <!-- Поиск -->
+                <Frame BackgroundColor="White"
+                       Padding="20"
+                       CornerRadius="15"
+                       HasShadow="True">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="🔍 Поиск по моим рецептам"
+                               FontSize="14"
+                               FontAttributes="Bold"
+                               TextColor="#5D4037" />
 
-                                <!-- Фото рецепта (раскомментируйте когда будете готовы) -->
-                                <!--
-                                <Frame BackgroundColor="#F5F5F5"
-                                       Padding="0"
-                                       CornerRadius="5"
-                                       HeightRequest="100"
-                                       HorizontalOptions="FillAndExpand">
-                                    <Image Source="{Binding ImagePath}"
-                                           Aspect="AspectFill"
-                                           HorizontalOptions="FillAndExpand"
-                                           VerticalOptions="FillAndExpand">
-                                        <Image.Source>
-                                            <FontImageSource Glyph="🍳"
-                                                             FontFamily="MaterialDesignIcons"
-                                                             Size="40"
-                                                             Color="LightGray" />
-                                        </Image.Source>
-                                    </Image>
-                                </Frame>
-                                -->
+                        <Frame BackgroundColor="#F8F8F8"
+                               CornerRadius="12"
+                               Padding="15,0"
+                               HeightRequest="50"
+                               HasShadow="False">
+                            <SearchBar x:Name="SearchBar"
+                                      Placeholder="Введите название рецепта..."
+                                      PlaceholderColor="#D8BFD8"
+                                      TextColor="#5D4037"
+                                      BackgroundColor="Transparent"
+                                      HorizontalOptions="Fill"
+                                      VerticalOptions="Center" />
+                        </Frame>
+                    </VerticalStackLayout>
+                </Frame>
 
-                                <Grid ColumnDefinitions="*,Auto" 
-                                      RowDefinitions="Auto,Auto,Auto,Auto">
+                <!-- Список рецептов -->
+                <CollectionView x:Name="RecipesCollectionView">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Frame BackgroundColor="White"
+                                   Padding="20"
+                                   CornerRadius="15"
+                                   Margin="0,0,0,15"
+                                   HasShadow="True">
 
-                                    <!-- Название и категория -->
-                                    <Label Grid.Row="0" Grid.Column="0"
-                                           Text="{Binding Title}"
-                                           TextColor="Black"
-                                           FontSize="16"
-                                           FontAttributes="Bold" />
+                                <VerticalStackLayout Spacing="15">
 
-                                    <Label Grid.Row="0" Grid.Column="1"
-                                           Text="{Binding Category}"
-                                           FontSize="10"
-                                           TextColor="White"
-                                           BackgroundColor="#2196F3"
-                                           Padding="8,4"
-                                           HorizontalOptions="End" />
+                                    <!-- Заголовок и категория -->
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <Label Grid.Column="0"
+                                               Text="{Binding Title}"
+                                               TextColor="#5D4037"
+                                               FontSize="16"
+                                               FontAttributes="Bold"
+                                               LineBreakMode="TailTruncation" />
+
+                                        <Frame Grid.Column="1"
+                                               BackgroundColor="#FF9E6D"
+                                               Padding="8,4"
+                                               CornerRadius="8"
+                                               HasShadow="False">
+                                            <Label Text="{Binding Category}"
+                                                   FontSize="10"
+                                                   FontAttributes="Bold"
+                                                   TextColor="White" />
+                                        </Frame>
+                                    </Grid>
 
                                     <!-- Описание -->
-                                    <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
-                                           Text="{Binding Description}"
-                                           FontSize="12"
-                                           TextColor="Gray"
+                                    <Label Text="{Binding Description}"
+                                           FontSize="13"
+                                           TextColor="#8D6E63"
                                            MaxLines="2"
                                            LineBreakMode="TailTruncation" />
 
                                     <!-- Пищевая ценность -->
-                                    <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
-                                           Text="{Binding NutritionInfo}"
-                                           FontSize="11"
-                                           TextColor="DarkGray" />
+                                    <Grid ColumnDefinitions="*,*,*,*" 
+                                          ColumnSpacing="5">
 
-                                    <!-- Время приготовления -->
-                                    <Label Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
-                                           Text="{Binding CookingTimeInfo}"
-                                           FontSize="10"
-                                           TextColor="Gray" />
-                                </Grid>
+                                        <!-- Калории -->
+                                        <Frame BackgroundColor="#FFF3E0"
+                                               Padding="8"
+                                               CornerRadius="8"
+                                               HasShadow="False">
+                                            <VerticalStackLayout Spacing="2" HorizontalOptions="Center">
+                                                <Label Text="🔥"
+                                                       FontSize="10"
+                                                       HorizontalOptions="Center" />
+                                                <Label Text="{Binding CaloriesPerServing, StringFormat='{0} ккал'}"
+                                                       FontSize="10"
+                                                       FontAttributes="Bold"
+                                                       TextColor="#F57C00"
+                                                       HorizontalOptions="Center" />
+                                            </VerticalStackLayout>
+                                        </Frame>
 
-                                <!-- Кнопка просмотра деталей - ДОБАВЛЕНО ВНУТРИ ШАБЛОНА -->
-                                <Button Text="👁️ Посмотреть рецепт"
-                                        BackgroundColor="#2196F3"
-                                        TextColor="White"
-                                        FontSize="12"
-                                        Clicked="OnViewRecipeClicked"
-                                        CommandParameter="{Binding .}" />
+                                        <!-- Белки -->
+                                        <Frame BackgroundColor="#E8F5E8"
+                                               Padding="8"
+                                               CornerRadius="8"
+                                               HasShadow="False">
+                                            <VerticalStackLayout Spacing="2" HorizontalOptions="Center">
+                                                <Label Text="🥩"
+                                                       FontSize="10"
+                                                       HorizontalOptions="Center" />
+                                                <Label Text="{Binding ProteinPerServing, StringFormat='{0}г'}"
+                                                       FontSize="10"
+                                                       FontAttributes="Bold"
+                                                       TextColor="#388E3C"
+                                                       HorizontalOptions="Center" />
+                                            </VerticalStackLayout>
+                                        </Frame>
 
-                            </VerticalStackLayout>
-                        </Frame>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+                                        <!-- Жиры -->
+                                        <Frame BackgroundColor="#FFF3E0"
+                                               Padding="8"
+                                               CornerRadius="8"
+                                               HasShadow="False">
+                                            <VerticalStackLayout Spacing="2" HorizontalOptions="Center">
+                                                <Label Text="🥑"
+                                                       FontSize="10"
+                                                       HorizontalOptions="Center" />
+                                                <Label Text="{Binding FatPerServing, StringFormat='{0}г'}"
+                                                       FontSize="10"
+                                                       FontAttributes="Bold"
+                                                       TextColor="#F57C00"
+                                                       HorizontalOptions="Center" />
+                                            </VerticalStackLayout>
+                                        </Frame>
 
-            <!-- Сообщение если нет рецептов -->
-            <Frame x:Name="NoRecipesFrame"
-                   BackgroundColor="#FFF3E0"
-                   Padding="20"
-                   CornerRadius="10"
-                   IsVisible="False">
-                <VerticalStackLayout Spacing="10" 
-                                    HorizontalOptions="Center">
-                    <Label Text="📝 У вас пока нет рецептов"
-                           TextColor="Black"
-                           FontSize="16"
-                           FontAttributes="Bold"
-                           HorizontalOptions="Center" />
+                                        <!-- Углеводы -->
+                                        <Frame BackgroundColor="#E3F2FD"
+                                               Padding="8"
+                                               CornerRadius="8"
+                                               HasShadow="False">
+                                            <VerticalStackLayout Spacing="2" HorizontalOptions="Center">
+                                                <Label Text="🍚"
+                                                       FontSize="10"
+                                                       HorizontalOptions="Center" />
+                                                <Label Text="{Binding CarbsPerServing, StringFormat='{0}г'}"
+                                                       FontSize="10"
+                                                       FontAttributes="Bold"
+                                                       TextColor="#1976D2"
+                                                       HorizontalOptions="Center" />
+                                            </VerticalStackLayout>
+                                        </Frame>
+                                    </Grid>
 
-                    <Label Text="Создайте свой первый рецепт и он появится здесь!"
-                           FontSize="12"
-                           TextColor="Gray"
-                           HorizontalOptions="Center" />
+                                    <!-- Время приготовления и кнопка -->
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <Label Grid.Column="0"
+                                               Text="{Binding CookingTime, StringFormat='⏱️ {0} мин'}"
+                                               FontSize="11"
+                                               TextColor="#8D6E63"
+                                               VerticalOptions="Center" />
 
-                    <Button Text="➕ Создать первый рецепт"
-                            BackgroundColor="#FF9800"
-                            TextColor="White"
-                            Clicked="OnAddNewRecipeClicked" />
-                </VerticalStackLayout>
-            </Frame>
+                                        <Button Grid.Column="1"
+                                                Text="👁️ Посмотреть"
+                                                BackgroundColor="#4DB6AC"
+                                                TextColor="White"
+                                                CornerRadius="8"
+                                                FontSize="12"
+                                                FontAttributes="Bold"
+                                                HeightRequest="35"
+                                                WidthRequest="120"
+                                                Clicked="OnViewRecipeClicked"
+                                                CommandParameter="{Binding .}" />
+                                    </Grid>
 
-        </VerticalStackLayout>
-    </ScrollView>
+                                </VerticalStackLayout>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <!-- Сообщение если нет рецептов -->
+                <Frame x:Name="NoRecipesFrame"
+                       BackgroundColor="#FFF3E0"
+                       Padding="30"
+                       CornerRadius="15"
+                       HasShadow="True"
+                       IsVisible="False">
+                    <VerticalStackLayout Spacing="20" 
+                                        HorizontalOptions="Center">
+
+                        <Label Text="🍳 У вас пока нет рецептов"
+                               TextColor="#5D4037"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               HorizontalOptions="Center" />
+
+                        <Label Text="Создайте свой первый рецепт и он появится здесь!"
+                               FontSize="14"
+                               TextColor="#8D6E63"
+                               HorizontalOptions="Center"
+                               HorizontalTextAlignment="Center" />
+
+                        <Button Text="➕ Создать первый рецепт"
+                                BackgroundColor="#FF9E6D"
+                                TextColor="White"
+                                CornerRadius="12"
+                                FontSize="14"
+                                FontAttributes="Bold"
+                                HeightRequest="50"
+                                Clicked="OnAddNewRecipeClicked" />
+                    </VerticalStackLayout>
+                </Frame>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
 </ContentPage>

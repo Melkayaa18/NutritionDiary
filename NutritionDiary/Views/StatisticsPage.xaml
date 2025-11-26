@@ -2,95 +2,210 @@
 <ContentPage x:Class="NutritionDiary.Views.StatisticsPage"
              xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             Title="Статистика">
+             Title="Статистика"
+             BackgroundColor="#FFFBF5">
 
-    <ScrollView>
-        <VerticalStackLayout Spacing="20" Padding="20">
+    <RefreshView x:Name="RefreshView" RefreshColor="#FF9E6D">
+        <ScrollView>
+            <VerticalStackLayout Spacing="25" Padding="25">
 
-            <Label Text="Ваша статистика питания"
-                   FontSize="20"
-                   FontAttributes="Bold"
-                   HorizontalOptions="Center" />
+                <!-- Заголовок -->
+                <Frame BackgroundColor="#FF9E6D"
+                       Padding="20"
+                       CornerRadius="15"
+                       HorizontalOptions="Fill">
+                    <Label Text="📊 Ваша статистика питания"
+                           FontSize="20"
+                           FontAttributes="Bold"
+                           TextColor="White"
+                           HorizontalOptions="Center" />
+                </Frame>
 
-            <Frame BackgroundColor="White"
-                   Padding="15"
-                   CornerRadius="10">
+                <!-- Сегодняшний прогресс -->
+                <Frame BackgroundColor="White"
+                       Padding="25"
+                       CornerRadius="20"
+                       HasShadow="True">
 
-                <VerticalStackLayout Spacing="10">
-                    <Label Text="Сегодня"
-                           TextColor="#483D8B"
-                           FontAttributes="Bold" />
+                    <VerticalStackLayout Spacing="20">
+                        <Label Text="📅 Сегодня"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               TextColor="#5D4037" />
 
-                    <ProgressBar x:Name="TodayCaloriesProgress" />
-                    <Label x:Name="TodayCaloriesLabel"
-                           TextColor="#483D8B"/>
+                        <!-- Калории -->
+                        <VerticalStackLayout Spacing="10">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Grid.Column="0"
+                                       Text="🔥 Калории"
+                                       FontSize="14"
+                                       FontAttributes="Bold"
+                                       TextColor="#FF6B35" />
+                                <Label x:Name="TodayCaloriesLabel"
+                                       Grid.Column="1"
+                                       Text="0/2000 ккал"
+                                       FontSize="12"
+                                       TextColor="#8D6E63" />
+                            </Grid>
 
-                    <Label Text="Белки:"
-                           TextColor="#483D8B"/>
-                    <ProgressBar x:Name="TodayProteinProgress" />
+                            <!-- Кастомный прогресс-бар для калорий -->
+                            <Grid HeightRequest="8">
+                                <BoxView x:Name="TodayCaloriesProgressBg"
+                                         Color="#F5E6E0"
+                                         CornerRadius="4" />
+                                <BoxView x:Name="TodayCaloriesProgressFill"
+                                         Color="#FF9E6D"
+                                         CornerRadius="4"
+                                         HorizontalOptions="Start"
+                                         WidthRequest="0" />
+                            </Grid>
+                        </VerticalStackLayout>
 
-                    <Label Text="Жиры:"
-                           TextColor="#483D8B"/>
-                    <ProgressBar x:Name="TodayFatProgress" />
+                        <!-- БЖУ -->
+                        <Grid ColumnDefinitions="*,*,*" 
+                              ColumnSpacing="15"
+                              RowDefinitions="Auto,Auto,Auto">
 
-                    <Label Text="Углеводы:"
-                           TextColor="#483D8B"/>
-                    <ProgressBar x:Name="TodayCarbsProgress" />
-                </VerticalStackLayout>
-            </Frame>
+                            <!-- Белки -->
+                            <VerticalStackLayout Grid.Row="0" Grid.Column="0" Spacing="8">
+                                <Label Text="🥩 Белки"
+                                       FontSize="12"
+                                       FontAttributes="Bold"
+                                       TextColor="#388E3C" />
 
-            <Frame BackgroundColor="White"
-                   Padding="15"
-                   CornerRadius="10">
+                                <Grid HeightRequest="6">
+                                    <BoxView Color="#E8F5E8" CornerRadius="3" />
+                                    <BoxView x:Name="TodayProteinProgressFill"
+                                             Color="#81C784"
+                                             CornerRadius="3"
+                                             HorizontalOptions="Start"
+                                             WidthRequest="0" />
+                                </Grid>
 
-                <VerticalStackLayout Spacing="10">
-                    <Label Text="За неделю"
-                           TextColor="#483D8B"
-                           FontAttributes="Bold" />
+                                <Label Text="0/50г"
+                                       FontSize="10"
+                                       TextColor="#66BB6A"
+                                       HorizontalOptions="Center" />
+                            </VerticalStackLayout>
 
-                    <Label x:Name="WeekStatsLabel"
-                           TextColor="#483D8B"/>
-                </VerticalStackLayout>
-                
-            </Frame>
+                            <!-- Жиры -->
+                            <VerticalStackLayout Grid.Row="0" Grid.Column="1" Spacing="8">
+                                <Label Text="🥑 Жиры"
+                                       FontSize="12"
+                                       FontAttributes="Bold"
+                                       TextColor="#F57C00" />
 
+                                <Grid HeightRequest="6">
+                                    <BoxView Color="#FFF3E0" CornerRadius="3" />
+                                    <BoxView x:Name="TodayFatProgressFill"
+                                             Color="#FFB74D"
+                                             CornerRadius="3"
+                                             HorizontalOptions="Start"
+                                             WidthRequest="0" />
+                                </Grid>
 
-            <ProgressBar x:Name="ChallengesProgressBar"
- Progress="0"
- BackgroundColor="LightGray"
- ProgressColor="#4CAF50" />
+                                <Label Text="0/40г"
+                                       FontSize="10"
+                                       TextColor="#FFA726"
+                                       HorizontalOptions="Center" />
+                            </VerticalStackLayout>
 
+                            <!-- Углеводы -->
+                            <VerticalStackLayout Grid.Row="0" Grid.Column="2" Spacing="8">
+                                <Label Text="🍚 Углеводы"
+                                       FontSize="12"
+                                       FontAttributes="Bold"
+                                       TextColor="#1976D2" />
 
-            <Frame BackgroundColor="White"
-       Padding="15"
-       CornerRadius="10">
+                                <Grid HeightRequest="6">
+                                    <BoxView Color="#E3F2FD" CornerRadius="3" />
+                                    <BoxView x:Name="TodayCarbsProgressFill"
+                                             Color="#64B5F6"
+                                             CornerRadius="3"
+                                             HorizontalOptions="Start"
+                                             WidthRequest="0" />
+                                </Grid>
 
-                <VerticalStackLayout Spacing="10">
-                    <Label Text="🎯 Челлендж на сегодня"
-               FontAttributes="Bold"
-                           TextColor="Black"/>
+                                <Label Text="0/200г"
+                                       FontSize="10"
+                                       TextColor="#42A5F5"
+                                       HorizontalOptions="Center" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Frame>
 
-                    <Label x:Name="ChallengesInfoLabel"
-               Text="Загрузка..."
-               FontSize="12"
-                           TextColor="Black"/>
+                <!-- Статистика за неделю -->
+                <Frame BackgroundColor="White"
+                       Padding="25"
+                       CornerRadius="20"
+                       HasShadow="True">
 
-                    <VerticalStackLayout x:Name="ChallengesLayout" Spacing="8" />
+                    <VerticalStackLayout Spacing="15">
+                        <Label Text="📈 За неделю"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               TextColor="#5D4037" />
 
-                    <Button x:Name="AchievementsButton"
-Text="🏆 Получи совет!"
-BackgroundColor="LightBlue"
-TextColor="Black"
-FontSize="12"
-Clicked="OnDailyTipClicked" />
+                        <Label x:Name="WeekStatsLabel"
+                               TextColor="#8D6E63"
+                               FontSize="14"
+                               LineBreakMode="WordWrap" />
+                    </VerticalStackLayout>
+                </Frame>
 
-                </VerticalStackLayout>
-            </Frame>
-            <!--<ProgressBar x:Name="ChallengesProgressBar"
-             Progress="0"
-             BackgroundColor="LightGray"
-             ProgressColor="#4CAF50" />-->
-        </VerticalStackLayout>
-    </ScrollView>
+                <!-- Челленджи -->
+                <Frame BackgroundColor="White"
+                       Padding="25"
+                       CornerRadius="20"
+                       HasShadow="True">
+
+                    <VerticalStackLayout Spacing="15">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0"
+                                   Text="🎯 Челлендж на сегодня"
+                                   FontSize="18"
+                                   FontAttributes="Bold"
+                                   TextColor="#5D4037" />
+                            <Label x:Name="ChallengesInfoLabel"
+                                   Grid.Column="1"
+                                   Text="0/0"
+                                   FontSize="12"
+                                   TextColor="#8D6E63"
+                                   VerticalOptions="Center" />
+                        </Grid>
+
+                        <!-- Прогресс челленджей -->
+                        <VerticalStackLayout Spacing="8">
+                            <Grid HeightRequest="8">
+                                <BoxView Color="#F5E6E0" CornerRadius="4" />
+                                <BoxView x:Name="ChallengesProgressFill"
+                                         Color="#4CAF50"
+                                         CornerRadius="4"
+                                         HorizontalOptions="Start"
+                                         WidthRequest="0" />
+                            </Grid>
+                        </VerticalStackLayout>
+
+                        <!-- Список челленджей -->
+                        <VerticalStackLayout x:Name="ChallengesLayout" 
+                                             Spacing="12" />
+
+                        <!-- Кнопка совета -->
+                        <Button x:Name="AchievementsButton"
+                                Text="💡 Получить совет"
+                                BackgroundColor="#4DB6AC"
+                                TextColor="White"
+                                CornerRadius="12"
+                                FontSize="14"
+                                FontAttributes="Bold"
+                                HeightRequest="45"
+                                Clicked="OnDailyTipClicked" />
+                    </VerticalStackLayout>
+                </Frame>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
 
 </ContentPage>

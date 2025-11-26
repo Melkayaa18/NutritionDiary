@@ -1,19 +1,22 @@
 using NutritionDiary.Models;
 using NutritionDiary.Services;
+
 namespace NutritionDiary.Views;
 
 public partial class MyRecipeDetailsPage : ContentPage
 {
     private Recipe _recipe;
     private DatabaseHelper _dbHelper;
+
     public MyRecipeDetailsPage(Recipe recipe)
-	{
-		InitializeComponent();
+    {
+        InitializeComponent();
         _recipe = recipe;
         _dbHelper = new DatabaseHelper();
 
         LoadRecipeDetails();
     }
+
     private void LoadRecipeDetails()
     {
         if (_recipe == null) return;
@@ -22,104 +25,65 @@ public partial class MyRecipeDetailsPage : ContentPage
 
         // Основная информация
         TitleLabel.Text = _recipe.Title;
-        CategoryLabel.Text = $"Категория: {_recipe.Category}";
+        CategoryLabel.Text = _recipe.Category ?? "Без категории";
         DescriptionLabel.Text = _recipe.Description ?? "Описание отсутствует";
 
         // Пищевая ценность
-        CaloriesLabel.Text = $"{_recipe.CaloriesPerServing} ккал";
-        ProteinLabel.Text = $"{_recipe.ProteinPerServing} г";
-        FatLabel.Text = $"{_recipe.FatPerServing} г";
-        CarbsLabel.Text = $"{_recipe.CarbsPerServing} г";
+        CaloriesLabel.Text = _recipe.CaloriesPerServing.ToString();
+        ProteinLabel.Text = _recipe.ProteinPerServing.ToString();
+        FatLabel.Text = _recipe.FatPerServing.ToString();
+        CarbsLabel.Text = _recipe.CarbsPerServing.ToString();
 
         // Время приготовления
         CookingTimeLabel.Text = _recipe.CookingTime > 0 ? $"{_recipe.CookingTime} минут" : "Время не указано";
 
-        // Фото - УЛУЧШЕННАЯ ЛОГИКА
+        // Фото
         LoadRecipeImage();
 
         // Парсим ингредиенты и шаги из CookingSteps
         ParseCookingSteps(_recipe.CookingSteps);
     }
+
     protected override async void OnAppearing()
     {
         base.OnAppearing();
 
-        // Диагностика базы данных
+        // Обновляем данные при возвращении на страницу
         if (_recipe != null)
         {
-            var dbImagePath = await _dbHelper.GetRecipeImagePath(_recipe.RecipeId);
-            System.Diagnostics.Debug.WriteLine($"ImagePath из БД при загрузке: '{dbImagePath}'");
-            System.Diagnostics.Debug.WriteLine($"Совпадает с объектом: {dbImagePath == _recipe.ImagePath}");
+            // Обновляем рецепт из базы данных
+            var updatedRecipe = await _dbHelper.GetRecipeById(_recipe.RecipeId);
+            if (updatedRecipe != null)
+            {
+                _recipe = updatedRecipe;
+                LoadRecipeDetails();
+            }
         }
-
-        LoadRecipeDetails();
     }
+
     private void LoadRecipeImage()
     {
         try
         {
-            System.Diagnostics.Debug.WriteLine($"=== ДИАГНОСТИКА ИЗОБРАЖЕНИЯ ===");
-            System.Diagnostics.Debug.WriteLine($"ImagePath из БД: '{_recipe.ImagePath}'");
-            System.Diagnostics.Debug.WriteLine($"ImagePath is null or empty: {string.IsNullOrEmpty(_recipe.ImagePath)}");
-
-            if (!string.IsNullOrEmpty(_recipe.ImagePath))
+            if (!string.IsNullOrEmpty(_recipe.ImagePath) && File.Exists(_recipe.ImagePath))
             {
-                System.Diagnostics.Debug.WriteLine($"File.Exists: {File.Exists(_recipe.ImagePath)}");
-                System.Diagnostics.Debug.WriteLine($"Полный путь: {Path.GetFullPath(_recipe.ImagePath)}");
-                System.Diagnostics.Debug.WriteLine($"Директория существует: {Directory.Exists(Path.GetDirectoryName(_recipe.ImagePath))}");
-
-                if (File.Exists(_recipe.ImagePath))
-                {
-                    System.Diagnostics.Debug.WriteLine($"Размер файла: {new FileInfo(_recipe.ImagePath).Length} байт");
-
-                    // Пробуем загрузить разными способами
-                    try
-                    {
-                        RecipeImage.Source = ImageSource.FromFile(_recipe.ImagePath);
-                        System.Diagnostics.Debug.WriteLine($"? Фото загружено через FromFile: {_recipe.ImagePath}");
-                    }
-                    catch (Exception ex1)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"? Ошибка FromFile: {ex1.Message}");
-
-                        // Пробуем альтернативный способ
-                        try
-                        {
-                            var imageBytes = File.ReadAllBytes(_recipe.ImagePath);
-                            RecipeImage.Source = ImageSource.FromStream(() => new MemoryStream(imageBytes));
-                            System.Diagnostics.Debug.WriteLine($"? Фото загружено через FromStream");
-                        }
-                        catch (Exception ex2)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"? Ошибка FromStream: {ex2.Message}");
-                            ShowPlaceholder();
-                        }
-                    }
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine($"? Файл не существует по пути: {_recipe.ImagePath}");
-                    ShowPlaceholder();
-                }
+                RecipeImage.Source = ImageSource.FromFile(_recipe.ImagePath);
+                PlaceholderFrame.IsVisible = false;
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine($"? ImagePath пустой или null");
-                ShowPlaceholder();
+                RecipeImage.Source = null;
+                PlaceholderFrame.IsVisible = true;
             }
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"? Общая ошибка загрузки изображения: {ex.Message}");
-            ShowPlaceholder();
+            System.Diagnostics.Debug.WriteLine($"Ошибка загрузки изображения: {ex.Message}");
+            RecipeImage.Source = null;
+            PlaceholderFrame.IsVisible = true;
         }
     }
-    private void ShowPlaceholder()
-    {
-        // Показываем placeholder
-        RecipeImage.Source = "placeholder_recipe.png";
-        System.Diagnostics.Debug.WriteLine($"?? Показан placeholder");
-    }
+
     private void ParseCookingSteps(string cookingSteps)
     {
         if (string.IsNullOrEmpty(cookingSteps))
@@ -155,8 +119,11 @@ public partial class MyRecipeDetailsPage : ContentPage
             System.Diagnostics.Debug.WriteLine($"Ошибка парсинга шагов: {ex.Message}");
         }
     }
-       private async void OnEditClicked(object sender, EventArgs e)
+
+    private async void OnEditClicked(object sender, EventArgs e)
     {
+        await AnimateButtonClick(sender as Button);
+
         try
         {
             // Переходим на страницу редактирования
@@ -168,28 +135,25 @@ public partial class MyRecipeDetailsPage : ContentPage
             System.Diagnostics.Debug.WriteLine($"Ошибка открытия редактора: {ex.Message}");
         }
     }
-    
 
     private async void OnDeleteClicked(object sender, EventArgs e)
     {
+        await AnimateButtonClick(sender as Button);
+
         bool confirm = await DisplayAlert("Подтверждение",
-        $"Вы уверены, что хотите удалить рецепт \"{_recipe.Title}\"?",
-        "Да, удалить", "Отмена");
+            $"Вы уверены, что хотите удалить рецепт \"{_recipe.Title}\"?",
+            "Да, удалить", "Отмена");
 
         if (confirm)
         {
             try
             {
-                // Показываем индикатор загрузки
-                var loadingTask = DisplayAlert("Удаление", "Удаляем рецепт...", null);
-
                 bool success = await _dbHelper.DeleteRecipe(_recipe.RecipeId);
-
-                await loadingTask; // Закрываем alert
 
                 if (success)
                 {
-                    await DisplayAlert("Успех", "Рецепт успешно удален!", "OK");
+                    await AnimateSuccess();
+                    await DisplayAlert("Успех", "Рецепт успешно удален! ???", "OK");
 
                     // Возвращаемся на предыдущую страницу
                     await Navigation.PopAsync();
@@ -209,6 +173,23 @@ public partial class MyRecipeDetailsPage : ContentPage
 
     private async void OnBackClicked(object sender, EventArgs e)
     {
+        await AnimateButtonClick(sender as Button);
         await Navigation.PopAsync();
+    }
+
+    // Методы анимации
+    private async Task AnimateButtonClick(Button button)
+    {
+        if (button != null)
+        {
+            await button.ScaleTo(0.95, 50, Easing.SpringIn);
+            await button.ScaleTo(1, 100, Easing.SpringOut);
+        }
+    }
+
+    private async Task AnimateSuccess()
+    {
+        await EditButton.ScaleTo(1.1, 200);
+        await EditButton.ScaleTo(1, 200);
     }
 }

@@ -7,16 +7,21 @@ public partial class AddCustomProductPage : ContentPage
 {
     private DatabaseHelper _dbHelper;
     private int _userId;
+
     public AddCustomProductPage()
-	{
-		InitializeComponent();
+    {
+        InitializeComponent();
         _dbHelper = new DatabaseHelper();
         _userId = Preferences.Get("UserId", 0);
     }
+
     private async void OnSaveClicked(object sender, EventArgs e)
     {
         try
         {
+            // Анимация кнопки
+            await AnimateButtonClick(sender as Button);
+
             // Проверяем авторизацию
             if (_userId == 0)
             {
@@ -25,70 +30,25 @@ public partial class AddCustomProductPage : ContentPage
             }
 
             // Валидация данных
-            if (string.IsNullOrWhiteSpace(ProductNameEntry.Text))
-            {
-                await DisplayAlert("Ошибка", "Введите название продукта", "OK");
+            if (!ValidateInputs())
                 return;
-            }
 
-            if (!decimal.TryParse(CaloriesEntry.Text, out decimal calories) || calories < 0)
-            {
-                await DisplayAlert("Ошибка", "Введите корректное количество калорий", "OK");
-                return;
-            }
-
-            if (!decimal.TryParse(ProteinEntry.Text, out decimal protein) || protein < 0)
-            {
-                await DisplayAlert("Ошибка", "Введите корректное количество белков", "OK");
-                return;
-            }
-
-            if (!decimal.TryParse(FatEntry.Text, out decimal fat) || fat < 0)
-            {
-                await DisplayAlert("Ошибка", "Введите корректное количество жиров", "OK");
-                return;
-            }
-
-            if (!decimal.TryParse(CarbsEntry.Text, out decimal carbs) || carbs < 0)
-            {
-                await DisplayAlert("Ошибка", "Введите корректное количество углеводов", "OK");
-                return;
-            }
-
-            // УБЕРИТЕ эту строку - она вызывает ошибку:
-            // var loadingTask = DisplayAlert("Сохранение", "Сохраняем продукт...", null);
-
-            // Вместо этого просто показываем простой alert без отмены
-            // Или используйте ActivityIndicator если хотите более профессиональный вид
-
-            // Показываем индикатор загрузки
-            LoadingIndicator.IsVisible = true;
-            LoadingIndicator.IsRunning = true;
-
-            // Блокируем кнопки
-            SaveButton.IsEnabled = false;
-            CancelButton.IsEnabled = false;
+            SetLoadingState(true);
 
             // Сохраняем продукт
             bool success = await _dbHelper.AddCustomProduct(
                 ProductNameEntry.Text.Trim(),
-                calories,
-                protein,
-                fat,
-                carbs,
+                decimal.Parse(CaloriesEntry.Text),
+                decimal.Parse(ProteinEntry.Text),
+                decimal.Parse(FatEntry.Text),
+                decimal.Parse(CarbsEntry.Text),
                 _userId
             );
-            // Скрываем индикатор
-            LoadingIndicator.IsVisible = false;
-            LoadingIndicator.IsRunning = false;
-            SaveButton.IsEnabled = true;
-            CancelButton.IsEnabled = true;
 
             if (success)
             {
-                await DisplayAlert("Успех", "Продукт успешно сохранен!", "OK");
-
-                // Возвращаемся на предыдущую страницу
+                await AnimateSuccess();
+                await DisplayAlert("Успех", "Продукт успешно сохранен! ??", "OK");
                 await Navigation.PopAsync();
             }
             else
@@ -98,18 +58,68 @@ public partial class AddCustomProductPage : ContentPage
         }
         catch (Exception ex)
         {
-            // Всегда сбрасываем индикатор при ошибке
-            LoadingIndicator.IsVisible = false;
-            LoadingIndicator.IsRunning = false;
-            SaveButton.IsEnabled = true;
-            CancelButton.IsEnabled = true;
-
             await DisplayAlert("Ошибка", $"Не удалось сохранить продукт: {ex.Message}", "OK");
         }
-
+        finally
+        {
+            SetLoadingState(false);
+        }
     }
+
+    private bool ValidateInputs()
+    {
+        var errors = new List<string>();
+
+        if (string.IsNullOrWhiteSpace(ProductNameEntry.Text))
+            errors.Add("Введите название продукта");
+
+        if (!decimal.TryParse(CaloriesEntry.Text, out decimal calories) || calories < 0)
+            errors.Add("Введите корректное количество калорий");
+
+        if (!decimal.TryParse(ProteinEntry.Text, out decimal protein) || protein < 0)
+            errors.Add("Введите корректное количество белков");
+
+        if (!decimal.TryParse(FatEntry.Text, out decimal fat) || fat < 0)
+            errors.Add("Введите корректное количество жиров");
+
+        if (!decimal.TryParse(CarbsEntry.Text, out decimal carbs) || carbs < 0)
+            errors.Add("Введите корректное количество углеводов");
+
+        if (errors.Any())
+        {
+            DisplayAlert("Внимание", string.Join("\n", errors), "OK");
+            return false;
+        }
+
+        return true;
+    }
+
     private async void OnCancelClicked(object sender, EventArgs e)
     {
+        await AnimateButtonClick(sender as Button);
         await Navigation.PopAsync();
+    }
+
+    private void SetLoadingState(bool isLoading)
+    {
+        LoadingIndicator.IsVisible = isLoading;
+        LoadingIndicator.IsRunning = isLoading;
+        SaveButton.IsEnabled = !isLoading;
+        CancelButton.IsEnabled = !isLoading;
+    }
+
+    private async Task AnimateButtonClick(Button button)
+    {
+        if (button != null)
+        {
+            await button.ScaleTo(0.95, 50, Easing.SpringIn);
+            await button.ScaleTo(1, 100, Easing.SpringOut);
+        }
+    }
+
+    private async Task AnimateSuccess()
+    {
+        await SaveButton.ScaleTo(1.1, 200);
+        await SaveButton.ScaleTo(1, 200);
     }
 }

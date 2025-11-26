@@ -2,159 +2,346 @@
 <ContentPage x:Class="NutritionDiary.Views.DiaryEntryPage"
              xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             Title="Добавить запись">
+             Title="Добавить запись"
+             BackgroundColor="#FFFBF5">
 
     <ScrollView>
-        <VerticalStackLayout Spacing="15" Padding="20">
+        <VerticalStackLayout Spacing="20" Padding="25">
 
             <!-- Заголовок -->
-            <Label x:Name="TitleLabel"
-                   FontSize="18"
-                   FontAttributes="Bold"
-                   HorizontalOptions="Center" />
+            <Frame BackgroundColor="#FF9E6D"
+                   Padding="20"
+                   CornerRadius="15"
+                   HorizontalOptions="Fill">
+                <Label x:Name="TitleLabel"
+                       Text="Добавление продуктов"
+                       FontSize="20"
+                       FontAttributes="Bold"
+                       TextColor="White"
+                       HorizontalOptions="Center" />
+            </Frame>
 
             <!-- Поиск продукта -->
-            <Label Text="Поиск продукта:" />
-            <SearchBar x:Name="ProductSearchBar"
-                       TextColor="Black"
-                      Placeholder="Начните вводить название продукта..."
-                      TextChanged="OnSearchTextChanged"
-                      BackgroundColor="White" />
+            <Frame BackgroundColor="White"
+                   Padding="20"
+                   CornerRadius="15"
+                   HasShadow="True">
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="🔍 Поиск продукта"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="#5D4037" />
+
+                    <Frame BackgroundColor="#F8F8F8"
+                           CornerRadius="12"
+                           Padding="15,0"
+                           HeightRequest="50"
+                           HasShadow="False">
+                        <Entry x:Name="ProductSearchBar"
+                               Placeholder="Начните вводить название продукта..."
+                               PlaceholderColor="#D8BFD8"
+                               TextColor="#5D4037"
+                               BackgroundColor="Transparent"
+                               FontSize="16"
+                               HorizontalOptions="Fill"
+                               VerticalOptions="Center" />
+                    </Frame>
+                </VerticalStackLayout>
+            </Frame>
 
             <!-- Список продуктов -->
-            <Label Text="Выберите продукт:" />
-            <ListView x:Name="ProductsListView"
-                      HeightRequest="200"
-                      ItemSelected="OnProductSelectedFromList"
-                      HasUnevenRows="True">
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <ViewCell>
-                            <Grid Padding="15,10" 
-                                  BackgroundColor="{Binding IsSelected, Converter={x:StaticResource SelectedColorConverter}}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
+            <Frame BackgroundColor="White"
+                   Padding="20"
+                   CornerRadius="15"
+                   HasShadow="True">
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="📋 Список продуктов"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="#5D4037" />
 
-                                <VerticalStackLayout Grid.Column="0" Spacing="2">
-                                    <Label Text="{Binding Name}" 
-                                           FontSize="14" 
-                                           FontAttributes="Bold"
-                                           TextColor="{Binding IsSelected, Converter={x:StaticResource TextColorConverter}}" />
-                                    <Label Text="{Binding CaloriesPer100g, StringFormat='{0} ккал/100г'}" 
-                                           FontSize="12" 
-                                           TextColor="{Binding IsSelected, Converter={x:StaticResource SubtextColorConverter}}" />
-                                </VerticalStackLayout>
+                    <ListView x:Name="ProductsListView"
+                              HeightRequest="200"
+                              ItemSelected="OnProductSelectedFromList"
+                              HasUnevenRows="True"
+                              SeparatorVisibility="None">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <ViewCell>
+                                    <Frame BackgroundColor="{Binding IsSelected, Converter={x:StaticResource SelectedColorConverter}}"
+                                           Padding="15"
+                                           CornerRadius="10"
+                                           Margin="0,2"
+                                           HasShadow="False">
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                                <Label Text="{Binding Name}" 
+                                                       FontSize="14" 
+                                                       FontAttributes="Bold"
+                                                       TextColor="{Binding IsSelected, Converter={x:StaticResource TextColorConverter}}" />
+                                                <Grid ColumnDefinitions="*,*,*,*">
+                                                    <Label Grid.Column="0"
+                                                           Text="{Binding CaloriesPer100g, StringFormat='{0} ккал'}" 
+                                                           FontSize="11" 
+                                                           TextColor="{Binding IsSelected, Converter={x:StaticResource SubtextColorConverter}}" />
+                                                    <Label Grid.Column="1"
+                                                           Text="{Binding ProteinPer100g, StringFormat='Б: {0}г'}" 
+                                                           FontSize="11" 
+                                                           TextColor="{Binding IsSelected, Converter={x:StaticResource SubtextColorConverter}}" />
+                                                    <Label Grid.Column="2"
+                                                           Text="{Binding FatPer100g, StringFormat='Ж: {0}г'}" 
+                                                           FontSize="11" 
+                                                           TextColor="{Binding IsSelected, Converter={x:StaticResource SubtextColorConverter}}" />
+                                                    <Label Grid.Column="3"
+                                                           Text="{Binding CarbsPer100g, StringFormat='У: {0}г'}" 
+                                                           FontSize="11" 
+                                                           TextColor="{Binding IsSelected, Converter={x:StaticResource SubtextColorConverter}}" />
+                                                </Grid>
+                                            </VerticalStackLayout>
 
-                                <Label Grid.Column="1" 
-                                       Text="✅" 
-                                       FontSize="16" 
-                                       IsVisible="{Binding IsSelected}" />
-                            </Grid>
-                        </ViewCell>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-            
-            <Label Text="Выбранный продукт:" />
-            
+                                            <Label Grid.Column="1" 
+                                                   Text="✅" 
+                                                   FontSize="16" 
+                                                   IsVisible="{Binding IsSelected}"
+                                                   VerticalOptions="Center" />
+                                        </Grid>
+                                    </Frame>
+                                </ViewCell>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </VerticalStackLayout>
+            </Frame>
+
             <!-- Выбранный продукт -->
             <Frame x:Name="SelectedProductFrame"
                    BackgroundColor="#E8F5E8"
-                   Padding="15"
-                   CornerRadius="10"
+                   Padding="20"
+                   CornerRadius="15"
+                   HasShadow="True"
                    IsVisible="False">
-                <HorizontalStackLayout Spacing="10">
-                    <Label Text="✅" 
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="✅ Выбранный продукт"
                            FontSize="16"
-                           VerticalOptions="Center" />
-                    <VerticalStackLayout Spacing="2">
-                        <Label x:Name="SelectedProductName"
-                               Text="Название продукта"
-                               TextColor="Black"
-                               FontSize="14"
-                               FontAttributes="Bold" />
-                        <Label x:Name="SelectedProductCalories"
-                               Text="0 ккал/100г"
-                               FontSize="12"
-                               TextColor="Gray" />
-                    </VerticalStackLayout>
-                </HorizontalStackLayout>
-            </Frame>
+                           FontAttributes="Bold"
+                           TextColor="#388E3C" />
 
-            <!-- Количество -->
-            <Label Text="Количество (граммы):" />
-            <Entry x:Name="QuantityEntry"
-                   Text="100"
-                   Keyboard="Numeric" />
+                    <Grid ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                            <Label x:Name="SelectedProductName"
+                                   Text="Название продукта"
+                                   TextColor="#388E3C"
+                                   FontSize="14"
+                                   FontAttributes="Bold" />
+                            <Label x:Name="SelectedProductCalories"
+                                   Text="0 ккал/100г"
+                                   FontSize="12"
+                                   TextColor="#66BB6A" />
+                        </VerticalStackLayout>
 
-            <!-- Питательная ценность -->
-            <Frame BackgroundColor="White"
-                   Padding="15"
-                   CornerRadius="10">
-                <VerticalStackLayout Spacing="8">
-                    <Label Text="Питательная ценность:" 
-                           TextColor="DarkSlateGrey"
-                           FontAttributes="Bold" />
-
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-
-                        <Label Grid.Row="0" Grid.Column="0" Text="Калории:" TextColor="Black" />
-                        <Label x:Name="CaloriesLabel" Grid.Row="0" Grid.Column="1" Text="0" TextColor="Black" />
-
-                        <Label Grid.Row="1" Grid.Column="0" Text="Белки:" TextColor="Black" />
-                        <Label x:Name="ProteinLabel" Grid.Row="1" Grid.Column="1" Text="0 г" TextColor="Black" />
-
-                        <Label Grid.Row="2" Grid.Column="0" Text="Жиры:" TextColor="Black" />
-                        <Label x:Name="FatLabel" Grid.Row="2" Grid.Column="1" Text="0 г" TextColor="Black" />
-
-                        <Label Grid.Row="3" Grid.Column="0" Text="Углеводы:" TextColor="Black" />
-                        <Label x:Name="CarbsLabel" Grid.Row="3" Grid.Column="1" Text="0 г" TextColor="Black" />
+                        <Button Grid.Column="1"
+                                Text="✏️"
+                                BackgroundColor="Transparent"
+                                TextColor="#388E3C"
+                                FontSize="12"
+                                HeightRequest="30"
+                                WidthRequest="40"
+                                CornerRadius="15"
+                                Clicked="OnEditProductClicked" />
                     </Grid>
                 </VerticalStackLayout>
             </Frame>
 
-            <!-- Кнопка создания своего продукта -->
-            <Button x:Name="AddCustomProductButton"
-                    Text="➕ Создать свой продукт"
-                    BackgroundColor="#4682B4"
-                    TextColor="White"
-                    Margin="0,10,0,0"
-                    Clicked="OnAddCustomProductClicked" />
+            <!-- Количество и питательная ценность -->
+            <Grid ColumnDefinitions="*,*" 
+                  ColumnSpacing="15">
 
+                <!-- Количество -->
+                <Frame Grid.Column="0"
+                       BackgroundColor="White"
+                       Padding="20"
+                       CornerRadius="15"
+                       HasShadow="True">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="⚖️ Количество"
+                               FontSize="14"
+                               FontAttributes="Bold"
+                               TextColor="#5D4037" />
 
-            <!--<Button x:Name="ScanBarcodeButton"
-        Text="📷 Сканировать штрих-код"
-        BackgroundColor="#FF9800"
-        TextColor="White"
-        Margin="0,10,0,0"
-        Clicked="OnScanBarcodeClicked" />-->
+                        <Frame BackgroundColor="#F8F8F8"
+                               CornerRadius="12"
+                               Padding="15,0"
+                               HeightRequest="50"
+                               HasShadow="False">
+                            <Entry x:Name="QuantityEntry"
+                                   Text="100"
+                                   Keyboard="Numeric"
+                                   TextColor="#5D4037"
+                                   BackgroundColor="Transparent"
+                                   FontSize="16"
+                                   HorizontalOptions="Fill"
+                                   VerticalOptions="Center"
+                                   HorizontalTextAlignment="Center" />
+                        </Frame>
 
+                        <Label Text="граммы"
+                               FontSize="11"
+                               TextColor="#8D6E63"
+                               HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </Frame>
 
+                <!-- Питательная ценность -->
+                <Frame Grid.Column="1"
+                       BackgroundColor="White"
+                       Padding="20"
+                       CornerRadius="15"
+                       HasShadow="True">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="📊 Питательная ценность" 
+                               FontSize="14"
+                               FontAttributes="Bold"
+                               TextColor="#5D4037" />
+
+                        <Grid RowDefinitions="*,*,*,*" RowSpacing="8">
+                            <!-- Калории -->
+                            <Grid Grid.Row="0" ColumnDefinitions="Auto,*">
+                                <Label Grid.Column="0" 
+                                       Text="🔥" 
+                                       FontSize="12"
+                                       VerticalOptions="Center" />
+                                <Label Grid.Column="1"
+                                       Text="Калории:"
+                                       FontSize="12"
+                                       TextColor="#5D4037"
+                                       VerticalOptions="Center" />
+                                <Label x:Name="CaloriesLabel" 
+                                       Grid.Column="1"
+                                       Text="0"
+                                       FontSize="12"
+                                       FontAttributes="Bold"
+                                       TextColor="#FF6B35"
+                                       HorizontalOptions="End"
+                                       VerticalOptions="Center" />
+                            </Grid>
+
+                            <!-- Белки -->
+                            <Grid Grid.Row="1" ColumnDefinitions="Auto,*">
+                                <Label Grid.Column="0" 
+                                       Text="🥩" 
+                                       FontSize="12"
+                                       VerticalOptions="Center" />
+                                <Label Grid.Column="1"
+                                       Text="Белки:"
+                                       FontSize="12"
+                                       TextColor="#5D4037"
+                                       VerticalOptions="Center" />
+                                <Label x:Name="ProteinLabel" 
+                                       Grid.Column="1"
+                                       Text="0 г"
+                                       FontSize="12"
+                                       FontAttributes="Bold"
+                                       TextColor="#388E3C"
+                                       HorizontalOptions="End"
+                                       VerticalOptions="Center" />
+                            </Grid>
+
+                            <!-- Жиры -->
+                            <Grid Grid.Row="2" ColumnDefinitions="Auto,*">
+                                <Label Grid.Column="0" 
+                                       Text="🥑" 
+                                       FontSize="12"
+                                       VerticalOptions="Center" />
+                                <Label Grid.Column="1"
+                                       Text="Жиры:"
+                                       FontSize="12"
+                                       TextColor="#5D4037"
+                                       VerticalOptions="Center" />
+                                <Label x:Name="FatLabel" 
+                                       Grid.Column="1"
+                                       Text="0 г"
+                                       FontSize="12"
+                                       FontAttributes="Bold"
+                                       TextColor="#F57C00"
+                                       HorizontalOptions="End"
+                                       VerticalOptions="Center" />
+                            </Grid>
+
+                            <!-- Углеводы -->
+                            <Grid Grid.Row="3" ColumnDefinitions="Auto,*">
+                                <Label Grid.Column="0" 
+                                       Text="🍚" 
+                                       FontSize="12"
+                                       VerticalOptions="Center" />
+                                <Label Grid.Column="1"
+                                       Text="Углеводы:"
+                                       FontSize="12"
+                                       TextColor="#5D4037"
+                                       VerticalOptions="Center" />
+                                <Label x:Name="CarbsLabel" 
+                                       Grid.Column="1"
+                                       Text="0 г"
+                                       FontSize="12"
+                                       FontAttributes="Bold"
+                                       TextColor="#1976D2"
+                                       HorizontalOptions="End"
+                                       VerticalOptions="Center" />
+                            </Grid>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Frame>
+            </Grid>
+
+            <!-- Дополнительные действия -->
+            <Grid ColumnDefinitions="*,*" 
+                  ColumnSpacing="15">
+
+                <Button x:Name="AddCustomProductButton"
+                        Grid.Column="0"
+                        Text="➕ Создать свой продукт"
+                        BackgroundColor="#4DB6AC"
+                        TextColor="White"
+                        CornerRadius="12"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        HeightRequest="50"
+                        Clicked="OnAddCustomProductClicked" />
+
+                <!--<Button x:Name="ScanBarcodeButton"
+                        Grid.Column="1"
+                        Text="📷 Сканировать штрих-код"
+                        BackgroundColor="#FFB74D"
+                        TextColor="White"
+                        CornerRadius="12"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        HeightRequest="50"
+                        Clicked="OnScanBarcodeClicked" />-->
+            </Grid>
 
             <!-- Кнопки действий -->
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+            <Grid ColumnDefinitions="*,*" 
+                  ColumnSpacing="15"
+                  Margin="0,10,0,0">
+
                 <Button Grid.Column="0"
-                        Text="Сохранить"
-                        BackgroundColor="Green"
+                        Text="💾 Сохранить"
+                        BackgroundColor="#FF9E6D"
                         TextColor="White"
+                        CornerRadius="12"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        HeightRequest="55"
                         Clicked="OnSaveClicked" />
 
                 <Button Grid.Column="1"
-                        Text="Отмена"
-                        BackgroundColor="Gray"
+                        Text="❌ Отмена"
+                        BackgroundColor="#8D6E63"
                         TextColor="White"
+                        CornerRadius="12"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        HeightRequest="55"
                         Clicked="OnCancelClicked" />
             </Grid>
 

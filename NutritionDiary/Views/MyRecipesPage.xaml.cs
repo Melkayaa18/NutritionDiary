@@ -1,6 +1,7 @@
 using NutritionDiary.Models;
 using NutritionDiary.Services;
 using System.Collections.ObjectModel;
+
 namespace NutritionDiary.Views;
 
 public partial class MyRecipesPage : ContentPage
@@ -11,16 +12,30 @@ public partial class MyRecipesPage : ContentPage
     private ObservableCollection<Recipe> _filteredRecipes;
 
     public MyRecipesPage(int userId)
-	{
-		InitializeComponent();
+    {
+        InitializeComponent();
         _dbHelper = new DatabaseHelper();
         _userId = userId;
         _filteredRecipes = new ObservableCollection<Recipe>();
 
         RecipesCollectionView.ItemsSource = _filteredRecipes;
+        RefreshView.Refreshing += OnRefreshing;
 
         LoadMyRecipes();
     }
+
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+        await LoadMyRecipes();
+    }
+
+    private async void OnRefreshing(object sender, EventArgs e)
+    {
+        await LoadMyRecipes();
+        RefreshView.IsRefreshing = false;
+    }
+
     private async Task LoadMyRecipes()
     {
         try
@@ -75,8 +90,8 @@ public partial class MyRecipesPage : ContentPage
         {
             var filtered = _allRecipes.Where(r =>
                 r.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-                r.Description.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-                r.Category.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+                (r.Description != null && r.Description.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
+                (r.Category != null && r.Category.Contains(searchText, StringComparison.OrdinalIgnoreCase))
             ).ToList();
 
             foreach (var recipe in filtered)
@@ -88,17 +103,14 @@ public partial class MyRecipesPage : ContentPage
 
     private async void OnAddNewRecipeClicked(object sender, EventArgs e)
     {
+        await AnimateButtonClick(sender as Button);
         await Navigation.PushAsync(new AddRecipePage(_userId));
     }
 
-    protected override async void OnAppearing()
-    {
-        base.OnAppearing();
-        // ќбновл€ем список при возвращении на страницу
-        await LoadMyRecipes();
-    }
     private async void OnViewRecipeClicked(object sender, EventArgs e)
     {
+        await AnimateButtonClick(sender as Button);
+
         try
         {
             var button = sender as Button;
@@ -116,5 +128,12 @@ public partial class MyRecipesPage : ContentPage
         }
     }
 
-
+    private async Task AnimateButtonClick(Button button)
+    {
+        if (button != null)
+        {
+            await button.ScaleTo(0.95, 50, Easing.SpringIn);
+            await button.ScaleTo(1, 100, Easing.SpringOut);
+        }
+    }
 }

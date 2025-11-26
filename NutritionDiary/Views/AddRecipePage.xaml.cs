@@ -1,66 +1,46 @@
 using System.Formats.Tar;
 using NutritionDiary.Models;
 using NutritionDiary.Services;
-namespace NutritionDiary.Views;
 using Microsoft.Maui.Media;
 using Microsoft.Maui.Storage;
+using Microsoft.Maui.Media;
+using Microsoft.Maui.Storage;
+namespace NutritionDiary.Views;
+
+
 public partial class AddRecipePage : ContentPage
 {
     private DatabaseHelper _dbHelper;
     private int _userId;
     private string _selectedImagePath;
+
     public AddRecipePage(int userId)
-	{
-		InitializeComponent();
+    {
+        InitializeComponent();
         _dbHelper = new DatabaseHelper();
         _userId = userId;
 
-        // Устанавливаем первую категорию по умолчанию
         CategoryPicker.SelectedIndex = 0;
     }
+
     private async void OnSaveRecipeClicked(object sender, EventArgs e)
     {
         try
         {
+            // Анимация кнопки
+            await AnimateButtonClick(sender as Button);
+
             // Валидация данных
-            if (string.IsNullOrWhiteSpace(TitleEntry.Text))
-            {
-                await DisplayAlert("Ошибка", "Введите название рецепта", "OK");
+            if (!ValidateInputs())
                 return;
-            }
 
-            if (!int.TryParse(CaloriesEntry.Text, out int calories) || calories < 0)
-            {
-                await DisplayAlert("Ошибка", "Введите корректное количество калорий", "OK");
-                return;
-            }
-
-            if (!int.TryParse(ProteinEntry.Text, out int protein) || protein < 0)
-            {
-                await DisplayAlert("Ошибка", "Введите корректное количество белков", "OK");
-                return;
-            }
-
-            if (!int.TryParse(FatEntry.Text, out int fat) || fat < 0)
-            {
-                await DisplayAlert("Ошибка", "Введите корректное количество жиров", "OK");
-                return;
-            }
-
-            if (!int.TryParse(CarbsEntry.Text, out int carbs) || carbs < 0)
-            {
-                await DisplayAlert("Ошибка", "Введите корректное количество углеводов", "OK");
-                return;
-            }
-
-            if (!int.TryParse(CookingTimeEntry.Text, out int cookingTime) || cookingTime <= 0)
-            {
-                await DisplayAlert("Ошибка", "Введите корректное время приготовления", "OK");
-                return;
-            }
             System.Diagnostics.Debug.WriteLine($"=== СОХРАНЕНИЕ РЕЦЕПТА ===");
             System.Diagnostics.Debug.WriteLine($"ImagePath для сохранения: '{_selectedImagePath}'");
-            System.Diagnostics.Debug.WriteLine($"File.Exists перед сохранением: {File.Exists(_selectedImagePath)}");
+
+            if (!string.IsNullOrEmpty(_selectedImagePath))
+            {
+                System.Diagnostics.Debug.WriteLine($"File.Exists перед сохранением: {File.Exists(_selectedImagePath)}");
+            }
 
             // Создаем объект рецепта
             var recipe = new Recipe
@@ -68,13 +48,13 @@ public partial class AddRecipePage : ContentPage
                 Title = TitleEntry.Text.Trim(),
                 Description = DescriptionEditor.Text?.Trim(),
                 Category = CategoryPicker.SelectedItem?.ToString() ?? "Другое",
-                CaloriesPerServing = calories,
-                ProteinPerServing = protein,
-                FatPerServing = fat,
-                CarbsPerServing = carbs,
+                CaloriesPerServing = int.Parse(CaloriesEntry.Text),
+                ProteinPerServing = int.Parse(ProteinEntry.Text),
+                FatPerServing = int.Parse(FatEntry.Text),
+                CarbsPerServing = int.Parse(CarbsEntry.Text),
                 ImagePath = _selectedImagePath,
                 CookingSteps = FormatCookingSteps(),
-                CookingTime = cookingTime,
+                CookingTime = int.Parse(CookingTimeEntry.Text),
                 CreatedByUserId = _userId,
                 IsActive = true
             };
@@ -84,7 +64,8 @@ public partial class AddRecipePage : ContentPage
 
             if (success)
             {
-                await DisplayAlert("Успех", "Рецепт успешно сохранен!", "OK");
+                await AnimateSuccess();
+                await DisplayAlert("Успех", "Рецепт успешно сохранен! ??", "OK");
                 await Navigation.PopAsync();
             }
             else
@@ -97,6 +78,37 @@ public partial class AddRecipePage : ContentPage
             await DisplayAlert("Ошибка", $"Не удалось сохранить рецепт: {ex.Message}", "OK");
             System.Diagnostics.Debug.WriteLine($"Ошибка сохранения рецепта: {ex.Message}");
         }
+    }
+
+    private bool ValidateInputs()
+    {
+        var errors = new List<string>();
+
+        if (string.IsNullOrWhiteSpace(TitleEntry.Text))
+            errors.Add("Введите название рецепта");
+
+        if (!int.TryParse(CaloriesEntry.Text, out int calories) || calories < 0)
+            errors.Add("Введите корректное количество калорий");
+
+        if (!int.TryParse(ProteinEntry.Text, out int protein) || protein < 0)
+            errors.Add("Введите корректное количество белков");
+
+        if (!int.TryParse(FatEntry.Text, out int fat) || fat < 0)
+            errors.Add("Введите корректное количество жиров");
+
+        if (!int.TryParse(CarbsEntry.Text, out int carbs) || carbs < 0)
+            errors.Add("Введите корректное количество углеводов");
+
+        if (!int.TryParse(CookingTimeEntry.Text, out int cookingTime) || cookingTime <= 0)
+            errors.Add("Введите корректное время приготовления");
+
+        if (errors.Any())
+        {
+            DisplayAlert("Внимание", string.Join("\n", errors), "OK");
+            return false;
+        }
+
+        return true;
     }
 
     private string FormatCookingSteps()
@@ -115,6 +127,8 @@ public partial class AddRecipePage : ContentPage
 
     private async void OnCancelClicked(object sender, EventArgs e)
     {
+        await AnimateButtonClick(sender as Button);
+
         bool confirm = await DisplayAlert("Подтверждение",
             "Вы уверены, что хотите отменить создание рецепта? Все несохраненные данные будут потеряны.",
             "Да, отменить", "Нет, продолжить");
@@ -125,10 +139,10 @@ public partial class AddRecipePage : ContentPage
         }
     }
 
-
-
     private async void OnAddPhotoClicked(object sender, EventArgs e)
     {
+        await AnimateButtonClick(sender as Button);
+
         try
         {
             var result = await FilePicker.Default.PickAsync(new PickOptions
@@ -157,7 +171,7 @@ public partial class AddRecipePage : ContentPage
             System.Diagnostics.Debug.WriteLine($"Ошибка выбора фото: {ex.Message}");
         }
     }
-    // Метод для копирования файла в постоянное хранилище
+
     private async Task<string> CopyFileToAppData(string sourcePath)
     {
         try
@@ -166,7 +180,6 @@ public partial class AddRecipePage : ContentPage
             System.Diagnostics.Debug.WriteLine($"Источник: {sourcePath}");
             System.Diagnostics.Debug.WriteLine($"Файл существует: {File.Exists(sourcePath)}");
 
-            // Используем специальную папку для данных приложения
             var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             var recipeImagesFolder = Path.Combine(appDataPath, "NutritionDiary", "RecipeImages");
 
@@ -178,13 +191,11 @@ public partial class AddRecipePage : ContentPage
                 System.Diagnostics.Debug.WriteLine($"? Создана папка: {recipeImagesFolder}");
             }
 
-            // Генерируем уникальное имя файла
             var fileName = $"{DateTime.Now:yyyyMMdd_HHmmss}_{Guid.NewGuid():N}{Path.GetExtension(sourcePath)}";
             var targetPath = Path.Combine(recipeImagesFolder, fileName);
 
             System.Diagnostics.Debug.WriteLine($"Целевой путь: {targetPath}");
 
-            // Копируем файл с буферизацией
             using (var sourceStream = new FileStream(sourcePath, FileMode.Open, FileAccess.Read))
             using (var targetStream = new FileStream(targetPath, FileMode.Create, FileAccess.Write))
             {
@@ -192,7 +203,6 @@ public partial class AddRecipePage : ContentPage
                 await targetStream.FlushAsync();
             }
 
-            // Проверяем, что файл скопировался
             if (File.Exists(targetPath))
             {
                 var fileInfo = new FileInfo(targetPath);
@@ -204,19 +214,21 @@ public partial class AddRecipePage : ContentPage
             else
             {
                 System.Diagnostics.Debug.WriteLine($"? Файл не скопировался!");
-                return sourcePath; // Возвращаем оригинальный путь как fallback
+                return sourcePath;
             }
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"? Ошибка копирования фото: {ex.Message}");
             System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
-            return sourcePath; // Возвращаем оригинальный путь в случае ошибки
+            return sourcePath;
         }
     }
-    private void OnRemovePhotoClicked(object sender, EventArgs e)
+
+    private async void OnRemovePhotoClicked(object sender, EventArgs e)
     {
-        // Удаляем фото из хранилища
+        await AnimateButtonClick(sender as Button);
+
         if (!string.IsNullOrEmpty(_selectedImagePath) && File.Exists(_selectedImagePath))
         {
             try
@@ -229,31 +241,25 @@ public partial class AddRecipePage : ContentPage
             }
         }
 
-        // Удаляем фото
         _selectedImagePath = null;
         RecipeImage.Source = null;
         ImageFrame.IsVisible = false;
         RemovePhotoButton.IsVisible = false;
         AddPhotoButton.Text = "?? Добавить фото";
     }
-    
-    
+
+    private async Task AnimateButtonClick(Button button)
+    {
+        if (button != null)
+        {
+            await button.ScaleTo(0.95, 50, Easing.SpringIn);
+            await button.ScaleTo(1, 100, Easing.SpringOut);
+        }
+    }
+
+    private async Task AnimateSuccess()
+    {
+        await SaveButton.ScaleTo(1.1, 200);
+        await SaveButton.ScaleTo(1, 200);
+    }
 }
-
-    //private async void OnAddPhotoClicked(object sender, EventArgs e)
-    //{
-    //    try
-    //    {
-    //        var photo = await MediaPicker.PickPhotoAsync();
-    //        if (photo != null)
-    //        {
-    //            RecipeImage.Source = ImageSource.FromFile(photo.FullPath);
-    //            // Сохраните путь к фото в рецепте
-    //        }
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        await DisplayAlert("Ошибка", "Не удалось выбрать фото", "OK");
-    //    }
-    //}
-

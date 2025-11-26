@@ -2,21 +2,208 @@
 <ContentPage x:Class="NutritionDiary.Views.CategoryRecipesPage"
              xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             Title="Рецепты">
+             Title="Рецепты категории"
+             BackgroundColor="#FFFBF5">
 
     <ScrollView>
-        <VerticalStackLayout Spacing="15" Padding="20">
+        <VerticalStackLayout Spacing="25" Padding="25">
 
-            <Label x:Name="TitleLabel"
-                   FontSize="20"
-                   FontAttributes="Bold"
-                   HorizontalOptions="Center" />
+            <!-- Заголовок категории -->
+            <Frame BackgroundColor="#FF9E6D"
+                   Padding="20"
+                   CornerRadius="15"
+                   HorizontalOptions="Fill">
+                <VerticalStackLayout Spacing="5">
+                    <Label x:Name="TitleLabel"
+                           Text="🍽️ Категория"
+                           FontSize="20"
+                           FontAttributes="Bold"
+                           TextColor="White"
+                           HorizontalOptions="Center" />
 
-            <Label x:Name="DescriptionLabel" />
+                    <Label x:Name="DescriptionLabel"
+                           FontSize="14"
+                           TextColor="White"
+                           HorizontalOptions="Center"
+                           LineBreakMode="WordWrap" />
+                </VerticalStackLayout>
+            </Frame>
 
-            <VerticalStackLayout x:Name="RecipesLayout" Spacing="10" />
+            <!-- Счетчик рецептов -->
+            <Frame BackgroundColor="White"
+                   Padding="15"
+                   CornerRadius="15"
+                   HasShadow="True">
+                <Label x:Name="RecipesCountLabel"
+                       FontSize="14"
+                       FontAttributes="Bold"
+                       TextColor="#5D4037"
+                       HorizontalOptions="Center" />
+            </Frame>
+
+            <!-- Список рецептов -->
+            <CollectionView x:Name="RecipesCollectionView">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame BackgroundColor="White"
+                               Padding="25"
+                               CornerRadius="20"
+                               HasShadow="True"
+                               Margin="0,0,0,15">
+                            <Grid ColumnDefinitions="*,Auto" 
+                                  RowDefinitions="Auto,Auto,Auto,Auto"
+                                  RowSpacing="8">
+
+                                <!-- Название рецепта -->
+                                <Label Grid.Row="0" Grid.Column="0"
+                                       Text="{Binding Title}"
+                                       FontSize="18"
+                                       FontAttributes="Bold"
+                                       TextColor="#5D4037"
+                                       LineBreakMode="WordWrap" />
+
+                                <!-- Калории -->
+                                <Frame Grid.Row="0" Grid.Column="1"
+                                       BackgroundColor="#FFF3E0"
+                                       Padding="10,5"
+                                       CornerRadius="8"
+                                       HasShadow="False">
+                                    <Label Text="{Binding CaloriesPerServing, StringFormat='{0} ккал'}"
+                                           FontSize="12"
+                                           FontAttributes="Bold"
+                                           TextColor="#F57C00"
+                                           HorizontalOptions="Center" />
+                                </Frame>
+
+                                <!-- Описание -->
+                                <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                       Text="{Binding Description}"
+                                       FontSize="14"
+                                       TextColor="#8D6E63"
+                                       LineBreakMode="WordWrap"
+                                       MaxLines="2" />
+
+                                <!-- Категория и время -->
+                                <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                      ColumnDefinitions="*,*">
+
+                                    <Frame Grid.Column="0"
+                                           BackgroundColor="#E8F5E8"
+                                           Padding="8,4"
+                                           CornerRadius="6"
+                                           HasShadow="False"
+                                           HorizontalOptions="Start">
+                                        <Label Text="{Binding Category}"
+                                               FontSize="11"
+                                               FontAttributes="Bold"
+                                               TextColor="#388E3C" />
+                                    </Frame>
+
+                                    <Frame Grid.Column="1"
+                                           BackgroundColor="#E3F2FD"
+                                           Padding="8,4"
+                                           CornerRadius="6"
+                                           HasShadow="False"
+                                           HorizontalOptions="End">
+                                        <Label Text="{Binding CookingTime, StringFormat='⏱️ {0} мин'}"
+                                               FontSize="11"
+                                               FontAttributes="Bold"
+                                               TextColor="#1976D2" />
+                                    </Frame>
+                                </Grid>
+
+                                <!-- БЖУ -->
+                                <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+                                      ColumnDefinitions="*,*,*"
+                                      ColumnSpacing="10">
+
+                                    <Frame BackgroundColor="#E8F5E8"
+                                           Padding="10,5"
+                                           CornerRadius="8"
+                                           HasShadow="False">
+                                        <VerticalStackLayout Spacing="2">
+                                            <Label Text="🥩 Белки"
+                                                   FontSize="10"
+                                                   FontAttributes="Bold"
+                                                   TextColor="#388E3C"
+                                                   HorizontalOptions="Center" />
+                                            <Label Text="{Binding ProteinPerServing, StringFormat='{0}г'}"
+                                                   FontSize="12"
+                                                   FontAttributes="Bold"
+                                                   TextColor="#388E3C"
+                                                   HorizontalOptions="Center" />
+                                        </VerticalStackLayout>
+                                    </Frame>
+
+                                    <Frame Grid.Column="1"
+                                           BackgroundColor="#FFF3E0"
+                                           Padding="10,5"
+                                           CornerRadius="8"
+                                           HasShadow="False">
+                                        <VerticalStackLayout Spacing="2">
+                                            <Label Text="🥑 Жиры"
+                                                   FontSize="10"
+                                                   FontAttributes="Bold"
+                                                   TextColor="#F57C00"
+                                                   HorizontalOptions="Center" />
+                                            <Label Text="{Binding FatPerServing, StringFormat='{0}г'}"
+                                                   FontSize="12"
+                                                   FontAttributes="Bold"
+                                                   TextColor="#F57C00"
+                                                   HorizontalOptions="Center" />
+                                        </VerticalStackLayout>
+                                    </Frame>
+
+                                    <Frame Grid.Column="2"
+                                           BackgroundColor="#E3F2FD"
+                                           Padding="10,5"
+                                           CornerRadius="8"
+                                           HasShadow="False">
+                                        <VerticalStackLayout Spacing="2">
+                                            <Label Text="🍚 Углеводы"
+                                                   FontSize="10"
+                                                   FontAttributes="Bold"
+                                                   TextColor="#1976D2"
+                                                   HorizontalOptions="Center" />
+                                            <Label Text="{Binding CarbsPerServing, StringFormat='{0}г'}"
+                                                   FontSize="12"
+                                                   FontAttributes="Bold"
+                                                   TextColor="#1976D2"
+                                                   HorizontalOptions="Center" />
+                                        </VerticalStackLayout>
+                                    </Frame>
+                                </Grid>
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- Сообщение если нет рецептов -->
+            <Frame x:Name="NoRecipesLabel"
+                   BackgroundColor="White"
+                   Padding="30"
+                   CornerRadius="20"
+                   HasShadow="True"
+                   IsVisible="False">
+                <VerticalStackLayout Spacing="15" HorizontalOptions="Center">
+                    <Label Text="📭"
+                           FontSize="40"
+                           HorizontalOptions="Center" />
+
+                    <Label Text="Рецепты не найдены"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextColor="#5D4037"
+                           HorizontalOptions="Center" />
+
+                    <Label Text="В этой категории пока нет рецептов"
+                           FontSize="14"
+                           TextColor="#8D6E63"
+                           HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </Frame>
 
         </VerticalStackLayout>
     </ScrollView>
-
 </ContentPage>

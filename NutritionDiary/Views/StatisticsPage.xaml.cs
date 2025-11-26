@@ -8,23 +8,91 @@ namespace NutritionDiary.Views
         private DatabaseHelper _dbHelper;
         private int _userId;
         private List<DailyChallenge> _todayChallenges;
+        private double _progressBarWidth = 0;
+
         public StatisticsPage()
         {
             InitializeComponent();
             _dbHelper = new DatabaseHelper();
             _userId = Preferences.Get("UserId", 0);
+
+            RefreshView.Refreshing += OnRefreshing;
+
+            // Подписываемся на событие изменения размера, чтобы получить ширину прогресс-баров
+            SizeChanged += OnPageSizeChanged;
+        }
+
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
             LoadStatistics();
             LoadDailyChallenges();
         }
-        
 
-        private async void LoadDailyChallenges()
+        private void OnPageSizeChanged(object sender, EventArgs e)
+        {
+            // Получаем ширину для прогресс-баров (примерно 90% ширины контейнера)
+            _progressBarWidth = this.Width * 0.9;
+            LoadStatistics();
+        }
+
+        private async void OnRefreshing(object sender, EventArgs e)
+        {
+            await LoadStatistics();
+            await LoadDailyChallenges();
+            RefreshView.IsRefreshing = false;
+        }
+
+        private async Task LoadStatistics()
+        {
+            if (_userId == 0)
+            {
+                TodayCaloriesLabel.Text = "Войдите в систему";
+                WeekStatsLabel.Text = "Для просмотра статистики войдите в систему";
+                return;
+            }
+
+            var (calories, protein, fat, carbs) = await _dbHelper.GetDailySummary(_userId, DateTime.Today);
+
+            // Анимируем прогресс бары
+            double calorieProgress = 2000 > 0 ? Math.Min((double)calories / 2000, 1.0) : 0;
+            await AnimateProgressBar(TodayCaloriesProgressFill, _progressBarWidth * calorieProgress);
+            TodayCaloriesLabel.Text = $"{calories:F0}/2000 ккал";
+
+            // Для БЖУ используем меньшую ширину (т.к. они в Grid с тремя колонками)
+            double smallProgressBarWidth = _progressBarWidth / 3 - 30; // учитываем отступы
+
+            double proteinProgress = Math.Min((double)protein / 50, 1.0);
+            double fatProgress = Math.Min((double)fat / 40, 1.0);
+            double carbsProgress = Math.Min((double)carbs / 200, 1.0);
+
+            await AnimateProgressBar(TodayProteinProgressFill, smallProgressBarWidth * proteinProgress);
+            await AnimateProgressBar(TodayFatProgressFill, smallProgressBarWidth * fatProgress);
+            await AnimateProgressBar(TodayCarbsProgressFill, smallProgressBarWidth * carbsProgress);
+
+            // Статистика за неделю
+            WeekStatsLabel.Text = "📊 Статистика за последние 7 дней:\n\n" +
+                                 "• Среднее потребление калорий: 1800 ккал/день\n" +
+                                 "• Самый калорийный день: Понедельник (2100 ккал)\n" +
+                                 "• Дней в норме: 5 из 7\n" +
+                                 "• Общий баланс БЖУ: Хороший";
+        }
+
+        private async Task AnimateProgressBar(BoxView progressFill, double targetWidth)
+        {
+            if (targetWidth < 0) targetWidth = 0;
+
+            var animation = new Animation(v => progressFill.WidthRequest = v, progressFill.WidthRequest, targetWidth);
+            animation.Commit(progressFill, "ProgressAnimation", 16, 800, Easing.SpringOut);
+        }
+
+        private async Task LoadDailyChallenges()
         {
             try
             {
                 if (_userId == 0)
                 {
-                    ChallengesInfoLabel.Text = "Войдите в систему для получения челленджей";
+                    ChallengesInfoLabel.Text = "Войдите в систему";
                     return;
                 }
 
@@ -33,10 +101,11 @@ namespace NutritionDiary.Views
             }
             catch (Exception ex)
             {
-                ChallengesInfoLabel.Text = "Ошибка загрузки челленджей";
+                ChallengesInfoLabel.Text = "Ошибка загрузки";
                 System.Diagnostics.Debug.WriteLine($"Ошибка загрузки челленджей: {ex.Message}");
             }
         }
+
         private void DisplayChallenges()
         {
             ChallengesLayout.Children.Clear();
@@ -44,57 +113,64 @@ namespace NutritionDiary.Views
             if (_todayChallenges == null || _todayChallenges.Count == 0)
             {
                 ChallengesInfoLabel.Text = "Нет активных челленджей";
-                ChallengesProgressBar.Progress = 0;
+                ChallengesProgressFill.WidthRequest = 0;
                 return;
             }
 
             int completedCount = _todayChallenges.Count(c => c.IsCompleted);
             double progress = (double)completedCount / _todayChallenges.Count;
 
-            ChallengesInfoLabel.Text = $"Выполнено: {completedCount}/{_todayChallenges.Count}";
-            ChallengesProgressBar.Progress = progress;
+            ChallengesInfoLabel.Text = $"{completedCount}/{_todayChallenges.Count}";
+
+            // Анимируем прогресс челленджей
+            var targetWidth = _progressBarWidth * progress;
+            var animation = new Animation(
+                v => ChallengesProgressFill.WidthRequest = v,
+                ChallengesProgressFill.WidthRequest,
+                targetWidth
+            );
+            animation.Commit(ChallengesProgressFill, "ChallengesProgressAnimation", 16, 800, Easing.SpringOut);
 
             foreach (var challenge in _todayChallenges)
             {
                 var challengeFrame = new Frame
                 {
                     BackgroundColor = challenge.IsCompleted ? Color.FromArgb("#E8F5E8") : Color.FromArgb("#FFF3E0"),
-                    Padding = 15,
-                    CornerRadius = 10,
-                    BorderColor = challenge.IsCompleted ? Colors.Green : Colors.LightGray,
+                    Padding = 20,
+                    CornerRadius = 12,
+                    BorderColor = challenge.IsCompleted ? Colors.Green : Color.FromArgb("#FFE0B2"),
                     HasShadow = true
                 };
 
                 var layout = new Grid
                 {
                     ColumnDefinitions =
-            {
-                new ColumnDefinition { Width = GridLength.Auto }, // Иконка
-                new ColumnDefinition { Width = GridLength.Star }, // Текст
-                new ColumnDefinition { Width = GridLength.Auto }  // Чекбокс
-            },
-                    ColumnSpacing = 12
+                    {
+                        new ColumnDefinition { Width = GridLength.Auto },
+                        new ColumnDefinition { Width = GridLength.Star },
+                        new ColumnDefinition { Width = GridLength.Auto }
+                    },
+                    ColumnSpacing = 15
                 };
 
-                // Иконка (первая колонка) - теперь из свойства модели
+                // Иконка
                 var iconLabel = new Label
                 {
-                    Text = challenge.Icon, // ← Используем вычисляемое свойство Icon
-                    FontSize = 24,
-                    VerticalOptions = LayoutOptions.Center,
-                    HorizontalOptions = LayoutOptions.Center
+                    Text = challenge.Icon,
+                    FontSize = 20,
+                    VerticalOptions = LayoutOptions.Center
                 };
                 Grid.SetColumn(iconLabel, 0);
                 layout.Children.Add(iconLabel);
 
-                // Текст (вторая колонка)
+                // Текст
                 var textLayout = new VerticalStackLayout { Spacing = 6 };
 
                 textLayout.Children.Add(new Label
                 {
                     Text = challenge.Title,
-                    FontAttributes = challenge.IsCompleted ? FontAttributes.Italic : FontAttributes.None,
-                    TextColor = challenge.IsCompleted ? Colors.Green : Colors.Black,
+                    FontAttributes = challenge.IsCompleted ? FontAttributes.Italic : FontAttributes.Bold,
+                    TextColor = challenge.IsCompleted ? Colors.Green : Color.FromArgb("#5D4037"),
                     FontSize = 14
                 });
 
@@ -102,13 +178,13 @@ namespace NutritionDiary.Views
                 {
                     Text = challenge.Description,
                     FontSize = 12,
-                    TextColor = Colors.DarkSlateGray
+                    TextColor = Color.FromArgb("#8D6E63")
                 });
 
-                // Категория с цветным бейджем
+                // Категория
                 var categoryLabel = new Label
                 {
-                    Text = $"{challenge.Icon} {challenge.Category}", // Используем ту же иконку
+                    Text = challenge.Category,
                     FontSize = 10,
                     TextColor = GetCategoryColor(challenge.Category),
                     FontAttributes = FontAttributes.Bold
@@ -118,13 +194,12 @@ namespace NutritionDiary.Views
                 Grid.SetColumn(textLayout, 1);
                 layout.Children.Add(textLayout);
 
-                // Чекбокс (третья колонка)
+                // Чекбокс
                 var checkBox = new CheckBox
                 {
                     IsChecked = challenge.IsCompleted,
                     Color = Colors.Green,
-                    VerticalOptions = LayoutOptions.Center,
-                    HorizontalOptions = LayoutOptions.End
+                    VerticalOptions = LayoutOptions.Center
                 };
 
                 checkBox.CheckedChanged += (s, e) => OnChallengeToggled(challenge, e.Value);
@@ -136,7 +211,6 @@ namespace NutritionDiary.Views
                 ChallengesLayout.Children.Add(challengeFrame);
             }
         }
-        
 
         private Color GetCategoryColor(string category)
         {
@@ -148,18 +222,18 @@ namespace NutritionDiary.Views
                 _ => Colors.Gray
             };
         }
+
         private async void OnChallengeToggled(DailyChallenge challenge, bool isCompleted)
         {
             try
             {
                 if (isCompleted && !challenge.IsCompleted)
                 {
-                    // Отмечаем как выполненное в базе
                     bool success = await _dbHelper.CompleteChallenge(challenge.ChallengeId);
                     if (success)
                     {
                         challenge.IsCompleted = true;
-                        DisplayChallenges(); // Обновляем отображение
+                        DisplayChallenges();
 
                         if (_todayChallenges.Count(c => c.IsCompleted) == 1)
                         {
@@ -169,12 +243,11 @@ namespace NutritionDiary.Views
                 }
                 else if (!isCompleted && challenge.IsCompleted)
                 {
-                    // СНИМАЕМ отметку о выполнении
                     bool success = await _dbHelper.UncompleteChallenge(challenge.ChallengeId);
                     if (success)
                     {
                         challenge.IsCompleted = false;
-                        DisplayChallenges(); // Обновляем отображение
+                        DisplayChallenges();
                     }
                 }
             }
@@ -183,34 +256,20 @@ namespace NutritionDiary.Views
                 System.Diagnostics.Debug.WriteLine($"Ошибка переключения челленджа: {ex.Message}");
             }
         }
-        private async void OnRefreshChallengesClicked(object sender, EventArgs e)
-        {
-            try
-            {
-                // Можно добавить логику для генерации новых челленджей
-                // Пока просто перезагружаем
-                await DisplayAlert("Инфо", "Новые челленджи появятся завтра! А сегодня доведите текущие до конца 😊", "OK");
-            }
-            catch (Exception ex)
-            {
-                await DisplayAlert("Ошибка", "Не удалось обновить челленджи", "OK");
-            }
-        }
-
-
-
 
         private async void OnDailyTipClicked(object sender, EventArgs e)
         {
+            await AnimateButtonClick(sender as Button);
+
             var tips = new[]
             {
-        "💡 Пейте воду перед едой - это поможет съесть меньше",
-        "💡 10-минутная прогулка после еды улучшает пищеварение",
-        "💡 Здоровый сон - ключ к контролю аппетита",
-        "💡 Готовьте еду заранее, чтобы избежать вредных перекусов",
-        "💡 Медленные приемы пищи помогают лучше чувствовать насыщение",
-        "💡 Белок на завтрак помогает контролировать голод в течение дня"
-    };
+                "💡 Пейте воду перед едой - это поможет съесть меньше",
+                "💡 10-минутная прогулка после еды улучшает пищеварение",
+                "💡 Здоровый сон - ключ к контролю аппетита",
+                "💡 Готовьте еду заранее, чтобы избежать вредных перекусов",
+                "💡 Медленные приемы пищи помогают лучше чувствовать насыщение",
+                "💡 Белок на завтрак помогает контролировать голод в течение дня"
+            };
 
             var random = new Random();
             var tip = tips[random.Next(tips.Length)];
@@ -218,33 +277,20 @@ namespace NutritionDiary.Views
             await DisplayAlert("💡 Совет дня", tip, "Спасибо!");
         }
 
-
-
-
-        private async void LoadStatistics()
+        private async Task AnimateButtonClick(Button button)
         {
-            if (_userId == 0) return;
+            if (button != null)
+            {
+                await button.ScaleTo(0.95, 50, Easing.SpringIn);
+                await button.ScaleTo(1, 100, Easing.SpringOut);
+            }
+        }
 
-            var (calories, protein, fat, carbs) = await _dbHelper.GetDailySummary(_userId, DateTime.Today);
-
-            // Прогресс калорий
-            double calorieProgress = 2000 > 0 ? Math.Min((double)calories / 2000, 1.0) : 0;
-            TodayCaloriesProgress.Progress = calorieProgress;
-            TodayCaloriesLabel.Text = $"Калории: {calories:F0}/2000 ккал";
-
-            // Прогресс БЖУ (примерные нормы)
-            TodayProteinProgress.Progress = (double)protein / 50;
-            TodayFatProgress.Progress = (double)fat / 40;
-            TodayCarbsProgress.Progress = (double)carbs / 200;
-
-            // Статистика за неделю (заглушка)
-            WeekStatsLabel.Text = "Статистика за последние 7 дней:\n\n" +
-                                 "• Среднее потребление калорий: 1800 ккал/день\n" +
-                                 "• Самый калорийный день: Понедельник (2100 ккал)\n" +
-                                 "• Дней в норме: 5 из 7\n" +
-                                 "• Общий баланс БЖУ: Хороший";
-
-            
+        protected override void OnDisappearing()
+        {
+            base.OnDisappearing();
+            // Отписываемся от событий
+            SizeChanged -= OnPageSizeChanged;
         }
     }
 }

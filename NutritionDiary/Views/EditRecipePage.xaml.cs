@@ -1,7 +1,7 @@
 using NutritionDiary.Models;
 using NutritionDiary.Services;
 using Microsoft.Maui.Storage;
-using System.Formats.Tar;
+
 namespace NutritionDiary.Views;
 
 public partial class EditRecipePage : ContentPage
@@ -9,9 +9,10 @@ public partial class EditRecipePage : ContentPage
     private DatabaseHelper _dbHelper;
     private Recipe _recipe;
     private string _selectedImagePath;
+
     public EditRecipePage(Recipe recipe)
-	{
-		InitializeComponent();
+    {
+        InitializeComponent();
         _dbHelper = new DatabaseHelper();
         _recipe = recipe;
 
@@ -55,6 +56,7 @@ public partial class EditRecipePage : ContentPage
             RecipeImage.Source = ImageSource.FromFile(_recipe.ImagePath);
             _selectedImagePath = _recipe.ImagePath;
             ImageFrame.IsVisible = true;
+            RemovePhotoButton.IsVisible = true;
         }
 
         // Парсим ингредиенты и шаги из CookingSteps
@@ -95,6 +97,8 @@ public partial class EditRecipePage : ContentPage
 
     private async void OnAddPhotoClicked(object sender, EventArgs e)
     {
+        await AnimateButtonClick(sender as Button);
+
         try
         {
             var result = await FilePicker.Default.PickAsync(new PickOptions
@@ -111,6 +115,7 @@ public partial class EditRecipePage : ContentPage
                 // Отображаем фото
                 RecipeImage.Source = ImageSource.FromFile(_selectedImagePath);
                 ImageFrame.IsVisible = true;
+                RemovePhotoButton.IsVisible = true;
 
                 await DisplayAlert("Успех", "Фото успешно обновлено!", "OK");
             }
@@ -151,8 +156,10 @@ public partial class EditRecipePage : ContentPage
         }
     }
 
-    private void OnRemovePhotoClicked(object sender, EventArgs e)
+    private async void OnRemovePhotoClicked(object sender, EventArgs e)
     {
+        await AnimateButtonClick(sender as Button);
+
         // Удаляем фото из хранилища
         if (!string.IsNullOrEmpty(_selectedImagePath) && File.Exists(_selectedImagePath))
         {
@@ -170,10 +177,13 @@ public partial class EditRecipePage : ContentPage
         _selectedImagePath = null;
         RecipeImage.Source = null;
         ImageFrame.IsVisible = false;
+        RemovePhotoButton.IsVisible = false;
     }
 
     private async void OnSaveClicked(object sender, EventArgs e)
     {
+        await AnimateButtonClick(sender as Button);
+
         try
         {
             // Валидация данных
@@ -183,25 +193,25 @@ public partial class EditRecipePage : ContentPage
                 return;
             }
 
-            if (!decimal.TryParse(CaloriesEntry.Text, out decimal calories) || calories < 0)
+            if (!int.TryParse(CaloriesEntry.Text, out int calories) || calories < 0)
             {
                 await DisplayAlert("Ошибка", "Введите корректное количество калорий", "OK");
                 return;
             }
 
-            if (!decimal.TryParse(ProteinEntry.Text, out decimal protein) || protein < 0)
+            if (!int.TryParse(ProteinEntry.Text, out int protein) || protein < 0)
             {
                 await DisplayAlert("Ошибка", "Введите корректное количество белков", "OK");
                 return;
             }
 
-            if (!decimal.TryParse(FatEntry.Text, out decimal fat) || fat < 0)
+            if (!int.TryParse(FatEntry.Text, out int fat) || fat < 0)
             {
                 await DisplayAlert("Ошибка", "Введите корректное количество жиров", "OK");
                 return;
             }
 
-            if (!decimal.TryParse(CarbsEntry.Text, out decimal carbs) || carbs < 0)
+            if (!int.TryParse(CarbsEntry.Text, out int carbs) || carbs < 0)
             {
                 await DisplayAlert("Ошибка", "Введите корректное количество углеводов", "OK");
                 return;
@@ -230,7 +240,8 @@ public partial class EditRecipePage : ContentPage
 
             if (success)
             {
-                await DisplayAlert("Успех", "Рецепт успешно обновлен!", "OK");
+                await AnimateSuccess();
+                await DisplayAlert("Успех", "Рецепт успешно обновлен! ??", "OK");
 
                 // Возвращаемся на предыдущую страницу
                 await Navigation.PopAsync();
@@ -263,6 +274,8 @@ public partial class EditRecipePage : ContentPage
 
     private async void OnCancelClicked(object sender, EventArgs e)
     {
+        await AnimateButtonClick(sender as Button);
+
         bool confirm = await DisplayAlert("Подтверждение",
             "Вы уверены, что хотите отменить редактирование? Все несохраненные изменения будут потеряны.",
             "Да, отменить", "Нет, продолжить");
@@ -271,5 +284,21 @@ public partial class EditRecipePage : ContentPage
         {
             await Navigation.PopAsync();
         }
+    }
+
+    // Методы анимации
+    private async Task AnimateButtonClick(Button button)
+    {
+        if (button != null)
+        {
+            await button.ScaleTo(0.95, 50, Easing.SpringIn);
+            await button.ScaleTo(1, 100, Easing.SpringOut);
+        }
+    }
+
+    private async Task AnimateSuccess()
+    {
+        await SaveButton.ScaleTo(1.1, 200);
+        await SaveButton.ScaleTo(1, 200);
     }
 }
